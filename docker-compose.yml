@@ -12,7 +12,14 @@ services:
       POSTGRES_DB: ${POSTGRES_DB_AUTH}
     healthcheck:
       test:
-        ["CMD", "pg_isready", "-U", "${POSTGRES_USER}", "-d", "${POSTGRES_DB}"]
+        [
+          "CMD",
+          "pg_isready",
+          "-U",
+          "${POSTGRES_USER_AUTH}",
+          "-d",
+          "${POSTGRES_DB_AUTH}",
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -30,7 +37,14 @@ services:
       POSTGRES_DB: ${POSTGRES_DB_WALLET}
     healthcheck:
       test:
-        ["CMD", "pg_isready", "-U", "${POSTGRES_USER}", "-d", "${POSTGRES_DB}"]
+        [
+          "CMD",
+          "pg_isready",
+          "-U",
+          "${POSTGRES_USER_WALLET}",
+          "-d",
+          "${POSTGRES_DB_WALLE}",
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
