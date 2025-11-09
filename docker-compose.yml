@@ -1,4 +1,20 @@
 services:
+  auth-service:
+    container_name: auth-service
+    image: node:25-alpine
+    build:
+      context: ./services/auth-service
+      dockerfile: Dockerfile.dev
+    ports:
+      - 3000:3000
+    volumes:
+      - ./services/auth-service:/app
+      - /app/node_modules
+    env_file: .env
+    depends_on:
+      postgres-auth:
+        condition: service_healthy
+
   postgres-auth:
     container_name: postgres-auth
     image: postgres:18-alpine
@@ -43,7 +59,7 @@ services:
           "-U",
           "${POSTGRES_USER_WALLET}",
           "-d",
-          "${POSTGRES_DB_WALLE}",
+          "${POSTGRES_DB_WALLET}",
         ]
       interval: 10s
       timeout: 5s
