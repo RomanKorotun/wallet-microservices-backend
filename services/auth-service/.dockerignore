@@ -4,3 +4,4 @@ dist/
 .vscode/
 .idea/
 Docerfile
+Dockerfile.dev
