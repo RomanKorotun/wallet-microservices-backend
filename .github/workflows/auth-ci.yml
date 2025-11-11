@@ -34,11 +34,6 @@ jobs:
         working-directory: ./services/auth-service
         run: yarn lint
 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: node-modules
-          path: ./services/auth-service/node_modules
-
   build:
     name: Build Check
     runs-on: ubuntu-latest
@@ -53,10 +48,9 @@ jobs:
         with:
           node-version: 22
 
-      - uses: actions/download-artifact@v4
-        with:
-          name: node-modules
-          path: ./services/auth-service/node_modules
+      - name: Install packages
+        working-directory: ./services/auth-service
+        run: yarn install
 
       - name: Build project
         working-directory: ./services/auth-service
