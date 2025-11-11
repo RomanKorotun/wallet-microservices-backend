@@ -10,7 +10,7 @@ COPY . ./
 
 RUN yarn build
 
-FROM node:25-alpine
+FROM node:25-alpine AS runtime
 
 WORKDIR /app
 
@@ -24,4 +24,6 @@ ENV NODE_ENV=production
 
 EXPOSE 3000
 
-CMD ["sh", "-c", "yarn start"]
+CMD ["yarn", "start"]
+
+
