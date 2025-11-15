@@ -7,7 +7,11 @@ import Joi from 'joi';
     ConfigModule.forRoot({
       isGlobal: true,
       validationSchema: Joi.object({
-        PORT: Joi.number().default(3000),
+        PORT: Joi.number(),
+        JWT_ACCESS_TOKEN_SECRET: Joi.string(),
+        JWT_ACCESS_TOKEN_TIME: Joi.number(),
+        JWT_REFRESH_TOKEN_SECRET: Joi.string(),
+        JWT_REFRESH_TOKEN_TIME: Joi.number(),
       }),
     }),
   ],
