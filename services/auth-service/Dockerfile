@@ -8,6 +8,8 @@ RUN yarn install --frozen-lockfile
 
 COPY . ./
 
+RUN npx prisma generate
+
 RUN yarn build
 
 FROM node:25-alpine AS runtime
@@ -22,7 +24,7 @@ COPY --from=builder /app/prisma ./prisma
 
 COPY --from=builder /app/dist ./dist
 
-RUN npx prisma generate
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 
 ENV NODE_ENV=production
 
