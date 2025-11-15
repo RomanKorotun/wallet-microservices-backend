@@ -52,6 +52,10 @@ jobs:
         working-directory: ./services/auth-service
         run: yarn install
 
+      - name: Generate Prisma Client
+        working-directory: ./services/auth-service
+        run: npx prisma generate
+
       - name: Build project
         working-directory: ./services/auth-service
         run: yarn build
