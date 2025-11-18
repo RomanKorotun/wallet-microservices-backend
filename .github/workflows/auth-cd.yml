@@ -12,6 +12,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Clone repository
+        uses: actions/checkout@v3
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 22
+
+      - name: Install packages
+        working-directory: ./services/auth-service
+        run: yarn install --frozen-lockfile
+
+      - name: Generate Prisma client
+        working-directory: ./services/auth-service
+        run: npx prisma generate
+
+      - name: Run Prisma migrations
+        working-directory: ./services/auth-service
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: npx prisma migrate deploy
+
       - name: Trigger Render Deploy Hook
         run: |
           curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK }}
