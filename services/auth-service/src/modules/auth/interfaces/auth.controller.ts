@@ -1,7 +1,7 @@
 import { Body, Controller, Post, Res } from '@nestjs/common';
 import type { Response } from 'express';
-import { SignupUseCase } from './application/use-cases/signup.use-case';
-import { SignupRequestDto } from './interfaces/dto/signup-request.dto';
+import { SignupUseCase } from '../application/use-cases/signup.use-case';
+import { SignupRequestDto } from './dto/signup-request.dto';
 
 @Controller('auth')
 export class AuthController {
