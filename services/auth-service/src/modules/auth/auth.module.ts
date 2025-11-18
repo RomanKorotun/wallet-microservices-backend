@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { AuthController } from './auth.controller';
+import { AuthController } from './interfaces/auth.controller';
 import { SignupUseCase } from './application/use-cases/signup.use-case';
 import { PasswordService } from './application/services/password.service';
 import { PrismaModule } from '../prisma/prisma.module';
