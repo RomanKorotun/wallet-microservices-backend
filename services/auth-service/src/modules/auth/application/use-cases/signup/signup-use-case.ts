@@ -1,11 +1,11 @@
 import { ConflictException, Inject, Injectable } from '@nestjs/common';
 import type { Response } from 'express';
-import { PasswordService } from '../services/password.service';
-import { SignupRequestDto } from '../../interfaces/dto/signup-request.dto';
-import type { IUserRepository } from '../../domain/repositiries/user.repository';
-import { TokenService } from '../services/token.service';
-import { TokenType } from '../../domain/enums/token-type.enum';
-import { CookieService } from '../services/cookie.service';
+import { PasswordService } from '../../services/password.service';
+import { SignupRequestDto } from '../../../interfaces/dto/signup/signup-request.dto';
+import type { IUserRepository } from '../../../domain/repositiries/user.repository';
+import { TokenService } from '../../services/token.service';
+import { TokenType } from '../../../domain/enums/token-type.enum';
+import { CookieService } from '../../services/cookie.service';
 
 @Injectable()
 export class SignupUseCase {
