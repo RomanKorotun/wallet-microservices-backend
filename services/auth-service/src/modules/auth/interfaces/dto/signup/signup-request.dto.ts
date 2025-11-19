@@ -6,9 +6,16 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
-import { PASSWORD_REGEX } from '../../../../common/constants/regex.constants';
+import { PASSWORD_REGEX } from '../../../../../common/constants/regex.constants';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class SignupRequestDto {
+  @ApiProperty({
+    description: "Ім'я користувача",
+    minLength: 2,
+    maxLength: 50,
+    example: 'Roman',
+  })
   @IsNotEmpty({ message: 'Поле username не моде бути пустим' })
   @IsString({ message: 'Поле username повинно бути рядком' })
   @MinLength(2, {
@@ -19,11 +26,19 @@ export class SignupRequestDto {
   })
   username: string;
 
+  @ApiProperty({
+    description: 'Email користувача',
+    example: 'roman.korotun@ukr.net',
+  })
   @IsNotEmpty({ message: 'Поле email не може бути пустим' })
   @IsString({ message: 'Поле email повинно бути рядком' })
   @IsEmail({}, { message: 'Поле email містить не вірний формат' })
   email: string;
 
+  @ApiProperty({
+    description: 'Пароль Користувача',
+    example: 'R1234567',
+  })
   @IsNotEmpty({ message: 'Поле password не може бути пустим' })
   @Matches(PASSWORD_REGEX, {
     message:

@@ -1,12 +1,12 @@
 import { Test } from '@nestjs/testing';
-import { IUserRepository } from '../../domain/repositiries/user.repository';
-import { CookieService } from '../services/cookie.service';
-import { PasswordService } from '../services/password.service';
-import { TokenService } from '../services/token.service';
-import { SignupUseCase } from './signup.use-case';
+import { IUserRepository } from '../../../domain/repositiries/user.repository';
+import { CookieService } from '../../services/cookie.service';
+import { PasswordService } from '../../services/password.service';
+import { TokenService } from '../../services/token.service';
+import { SignupUseCase } from './signup-use-case';
 import { ConflictException } from '@nestjs/common';
-import { DomainUser } from '../../domain/entities/user';
-import { TokenType } from '../../domain/enums/token-type.enum';
+import { DomainUser } from '../../../domain/entities/user';
+import { TokenType } from '../../../domain/enums/token-type.enum';
 
 describe('SignupUseCase', () => {
   let signupUseCase: SignupUseCase;

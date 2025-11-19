@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AuthController } from './interfaces/auth.controller';
-import { SignupUseCase } from './application/use-cases/signup.use-case';
+import { SignupUseCase } from './application/use-cases/signup/signup-use-case';
 import { PasswordService } from './application/services/password.service';
 import { PrismaModule } from '../prisma/prisma.module';
 import { UserRepository } from './infrastructure/repositories/user.repository';
