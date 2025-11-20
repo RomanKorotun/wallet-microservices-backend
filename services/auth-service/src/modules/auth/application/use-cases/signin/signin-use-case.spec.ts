@@ -1,31 +1,31 @@
 import { Test } from '@nestjs/testing';
-import { IUserRepository } from '../../../domain/repositiries/user.repository';
-import { CookieService } from '../../services/cookie.service';
+import { IUserRepository } from 'src/modules/auth/domain/repositiries/user.repository';
 import { PasswordService } from '../../services/password.service';
+import { SigninUseCase } from './signin-use-case';
 import { TokenService } from '../../services/token.service';
-import { SignupUseCase } from './signup-use-case';
-import { ConflictException } from '@nestjs/common';
-import { DomainUser } from '../../../domain/entities/user';
-import { TokenType } from '../../../domain/enums/token-type.enum';
+import { CookieService } from '../../services/cookie.service';
+import { DomainUser } from '../../../../../modules/auth/domain/entities/user';
+import { UnauthorizedException } from '@nestjs/common';
+import { TokenType } from '../../../../../modules/auth/domain/enums/token-type.enum';
 
-describe('SignupUseCase', () => {
-  let signupUseCase: SignupUseCase;
+describe('SigninUseCase', () => {
+  let signinUseCase: SigninUseCase;
   let passwordService: PasswordService;
   let userRepository: IUserRepository;
   let tokenService: TokenService;
-  let cookieService: CookieService;
+  let cookieServbice: CookieService;
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
       providers: [
-        SignupUseCase,
+        SigninUseCase,
         {
           provide: PasswordService,
-          useValue: { hash: jest.fn() },
+          useValue: { compare: jest.fn() },
         },
         {
           provide: 'IUserRepository',
-          useValue: { createUser: jest.fn(), findByEmail: jest.fn() },
+          useValue: { findByEmail: jest.fn() },
         },
         {
           provide: TokenService,
@@ -38,14 +38,14 @@ describe('SignupUseCase', () => {
       ],
     }).compile();
 
-    signupUseCase = module.get(SignupUseCase);
+    signinUseCase = module.get(SigninUseCase);
     passwordService = module.get(PasswordService);
     userRepository = module.get('IUserRepository');
     tokenService = module.get(TokenService);
-    cookieService = module.get(CookieService);
+    cookieServbice = module.get(CookieService);
   });
 
-  const dto = { username: 'test', email: 'test@gmail.com', password: '123456' };
+  const dto = { email: 'test@gmail.com', password: '123456' };
 
   const response: DomainUser = {
     id: 'test-id',
@@ -58,30 +58,30 @@ describe('SignupUseCase', () => {
 
   const res = {} as any;
 
-  it('should throw ConflictException if user already exists', async () => {
-    jest.spyOn(userRepository, 'findByEmail').mockResolvedValue(response);
-    await expect(signupUseCase.execute(res, dto)).rejects.toThrow(
-      ConflictException,
+  it('should throw UnauthorizedException if user does not exist', async () => {
+    jest.spyOn(userRepository, 'findByEmail').mockResolvedValue(null);
+    await expect(signinUseCase.execute(res, dto)).rejects.toThrow(
+      UnauthorizedException,
     );
   });
 
-  it('should create user and set cookies', async () => {
-    jest.spyOn(userRepository, 'findByEmail').mockResolvedValue(null);
-    jest.spyOn(passwordService, 'hash').mockResolvedValue('hashedPassword');
-    jest.spyOn(userRepository, 'createUser').mockResolvedValue(response);
+  it('should throw UnauthorizedException if password is invalid', async () => {
+    jest.spyOn(userRepository, 'findByEmail').mockResolvedValue(response);
+    jest.spyOn(passwordService, 'compare').mockResolvedValue(false);
+    await expect(signinUseCase.execute(res, dto)).rejects.toThrow(
+      UnauthorizedException,
+    );
+  });
+
+  it('should authenticate user and set cookies', async () => {
+    jest.spyOn(userRepository, 'findByEmail').mockResolvedValue(response);
+    jest.spyOn(passwordService, 'compare').mockResolvedValue(true);
     jest
       .spyOn(tokenService, 'generate')
       .mockReturnValueOnce('accessToken')
       .mockReturnValueOnce('refreshToken');
 
-    const result = await signupUseCase.execute(res, dto);
-
-    expect(passwordService.hash).toHaveBeenCalledWith(dto.password);
-
-    expect(userRepository.createUser).toHaveBeenCalledWith({
-      ...dto,
-      password: 'hashedPassword',
-    });
+    const result = await signinUseCase.execute(res, dto);
 
     expect(tokenService.generate).toHaveBeenNthCalledWith(
       1,
@@ -95,13 +95,13 @@ describe('SignupUseCase', () => {
       TokenType.REFRESH,
     );
 
-    expect(cookieService.setAuthCookie).toHaveBeenCalledWith(
+    expect(cookieServbice.setAuthCookie).toHaveBeenCalledWith(
       res,
       'accessToken',
       TokenType.ACCESS,
     );
 
-    expect(cookieService.setAuthCookie).toHaveBeenCalledWith(
+    expect(cookieServbice.setAuthCookie).toHaveBeenCalledWith(
       res,
       'refreshToken',
       TokenType.REFRESH,
