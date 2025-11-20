@@ -16,7 +16,7 @@ export class SignupRequestDto {
     maxLength: 50,
     example: 'Roman',
   })
-  @IsNotEmpty({ message: 'Поле username не моде бути пустим' })
+  @IsNotEmpty({ message: 'Поле username не може бути пустим' })
   @IsString({ message: 'Поле username повинно бути рядком' })
   @MinLength(2, {
     message: 'Поле username повинно бути не менше 2 символів',
