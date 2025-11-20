@@ -6,12 +6,14 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { UserRepository } from './infrastructure/repositories/user.repository';
 import { TokenService } from './application/services/token.service';
 import { CookieService } from './application/services/cookie.service';
+import { SigninUseCase } from './application/use-cases/signin/signin-use-case';
 
 @Module({
   imports: [PrismaModule],
   controllers: [AuthController],
   providers: [
     SignupUseCase,
+    SigninUseCase,
     PasswordService,
     TokenService,
     CookieService,

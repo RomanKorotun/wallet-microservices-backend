@@ -17,27 +17,34 @@ export class SignupUseCase {
   ) {}
   async execute(res: Response, dto: SignupRequestDto) {
     const { email, password } = dto;
+
     const user = await this.userRepository.findByEmail(email);
+
     if (user) {
       throw new ConflictException(
         `Користувач з email ${email} уже існує в базі`,
       );
     }
+
     const hashedPassword = await this.passwordService.hash(password);
+
     const createdUser = await this.userRepository.createUser({
       ...dto,
       password: hashedPassword,
     });
+
     const accessToken = this.tokenService.generate(
       createdUser.id,
       TokenType.ACCESS,
     );
+
     const refreshToken = this.tokenService.generate(
       createdUser.id,
       TokenType.REFRESH,
     );
 
     this.cookieService.setAuthCookie(res, accessToken, TokenType.ACCESS);
+
     this.cookieService.setAuthCookie(res, refreshToken, TokenType.REFRESH);
 
     return {
