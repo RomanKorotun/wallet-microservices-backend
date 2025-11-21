@@ -13,6 +13,7 @@ import { SignupRequestDto } from './dto/signup/signup-request.dto';
 import { SignupSwagger } from './swagger/signup.swagger';
 import { SigninRequestDto } from './dto/signin/signin-request.dto';
 import { SigninUseCase } from '../application/use-cases/signin/signin-use-case';
+import { SigninSwagger } from './swagger/signin.swagger';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -31,6 +32,7 @@ export class AuthController {
     return await this.signupUseCase.execute(res, dto);
   }
 
+  @SigninSwagger()
   @HttpCode(HttpStatus.OK)
   @Post('signin')
   async signin(

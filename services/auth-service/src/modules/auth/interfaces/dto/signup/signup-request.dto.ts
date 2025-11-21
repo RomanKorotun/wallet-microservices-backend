@@ -35,10 +35,7 @@ export class SignupRequestDto {
   @IsEmail({}, { message: 'Поле email містить не вірний формат' })
   email: string;
 
-  @ApiProperty({
-    description: 'Пароль Користувача',
-    example: 'R1234567',
-  })
+  @ApiProperty({ description: 'Пароль користувача', example: 'R1234567' })
   @IsNotEmpty({ message: 'Поле password не може бути пустим' })
   @Matches(PASSWORD_REGEX, {
     message:

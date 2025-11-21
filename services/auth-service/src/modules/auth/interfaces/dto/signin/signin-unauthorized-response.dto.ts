@@ -1,18 +1,18 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class SignupConflictResponseDto {
-  @ApiProperty({ description: 'Статус відповіді', example: 409 })
+export class SigninUnauthorizedResponseDto {
+  @ApiProperty({ description: 'Статус відповіді', example: 401 })
   status: number;
 
   @ApiProperty({
     description: 'Текст помилки',
-    example: 'Користувач з email roman@ukr.net уже існує в базі',
+    example: 'Email або password не вірні',
   })
   message: string;
 
   @ApiProperty({
     description: 'URL на який був зроблений запит',
-    example: '/api/auth/signup',
+    example: '/api/auth/signin',
   })
   url: string;
 

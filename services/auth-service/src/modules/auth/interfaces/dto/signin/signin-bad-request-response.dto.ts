@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class SignupBadResponseDto {
+export class SigninBadRequestResponseDto {
   @ApiProperty({ description: 'Статус відповіді', example: 400 })
   status: number;
 
@@ -15,7 +15,7 @@ export class SignupBadResponseDto {
 
   @ApiProperty({
     description: 'URL на який був зроблений запит',
-    example: '/api/auth/signup',
+    example: '/api/auth/signin',
   })
   url: string;
 
