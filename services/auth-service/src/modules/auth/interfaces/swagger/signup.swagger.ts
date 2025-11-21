@@ -12,7 +12,7 @@ import { SignupSuccessResponseDto } from '../dto/signup/signup-success-response.
 export const SignupSwagger = () => {
   return applyDecorators(
     ApiOperation({
-      summary: 'Реєструє користувача в базі даних',
+      summary: 'Реєстрація користувача в базі даних',
       description: 'Створює нового користувача в базі даних',
     }),
     ApiCreatedResponse({
