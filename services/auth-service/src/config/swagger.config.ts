@@ -11,4 +11,6 @@ export const swaggerConfig = new DocumentBuilder()
     'https://github.com/RomanKorotun/wallet-microservices-backend/tree/main/services/auth-service',
     'roman.korotun@ukr.net',
   )
+  .addCookieAuth('accessToken')
+  .addCookieAuth('refreshToken')
   .build();

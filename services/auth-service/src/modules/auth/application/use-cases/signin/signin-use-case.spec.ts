@@ -1,9 +1,9 @@
 import { Test } from '@nestjs/testing';
 import { IUserRepository } from 'src/modules/auth/domain/repositiries/user.repository';
-import { PasswordService } from '../../services/password.service';
+import { PasswordService } from '../../../infrastructure/services/password.service';
 import { SigninUseCase } from './signin-use-case';
-import { TokenService } from '../../services/token.service';
-import { CookieService } from '../../services/cookie.service';
+import { TokenService } from '../../../infrastructure/services/token.service';
+import { CookieService } from '../../../infrastructure/services/cookie.service';
 import { DomainUser } from '../../../../../modules/auth/domain/entities/user';
 import { UnauthorizedException } from '@nestjs/common';
 import { TokenType } from '../../../../../modules/auth/domain/enums/token-type.enum';

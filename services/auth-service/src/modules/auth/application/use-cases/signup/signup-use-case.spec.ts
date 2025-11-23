@@ -1,8 +1,8 @@
 import { Test } from '@nestjs/testing';
 import { IUserRepository } from '../../../domain/repositiries/user.repository';
-import { CookieService } from '../../services/cookie.service';
-import { PasswordService } from '../../services/password.service';
-import { TokenService } from '../../services/token.service';
+import { CookieService } from '../../../infrastructure/services/cookie.service';
+import { PasswordService } from '../../../infrastructure/services/password.service';
+import { TokenService } from '../../../infrastructure/services/token.service';
 import { SignupUseCase } from './signup-use-case';
 import { ConflictException } from '@nestjs/common';
 import { DomainUser } from '../../../domain/entities/user';
