@@ -1,9 +1,9 @@
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Response } from 'express';
-import { PasswordService } from '../../services/password.service';
+import { PasswordService } from '../../../infrastructure/services/password.service';
 import type { IUserRepository } from '../../../../../modules/auth/domain/repositiries/user.repository';
-import { TokenService } from '../../services/token.service';
-import { CookieService } from '../../services/cookie.service';
+import { TokenService } from '../../../infrastructure/services/token.service';
+import { CookieService } from '../../../infrastructure/services/cookie.service';
 import { SigninRequestDto } from '../../../../../modules/auth/interfaces/dto/signin/signin-request.dto';
 import { TokenType } from '../../../../../modules/auth/domain/enums/token-type.enum';
 
