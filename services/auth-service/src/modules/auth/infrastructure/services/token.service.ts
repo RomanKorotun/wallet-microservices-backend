@@ -11,12 +11,18 @@ export class TokenService {
   ) {}
 
   generate(userId: string, tokenType: TokenType): string {
-    const accessTokenSecret = this.configService.get('JWT_ACCESS_TOKEN_SECRET');
-    const accessTokenTime = +this.configService.get('JWT_ACCESS_TOKEN_TIME');
-    const refreshTokenSecret = this.configService.get(
+    const accessTokenSecret = this.configService.getOrThrow(
+      'JWT_ACCESS_TOKEN_SECRET',
+    );
+    const accessTokenTime = +this.configService.getOrThrow(
+      'JWT_ACCESS_TOKEN_TIME',
+    );
+    const refreshTokenSecret = this.configService.getOrThrow(
       'JWT_REFRESH_TOKEN_SECRET',
     );
-    const refreshTokenTime = +this.configService.get('JWT_REFRESH_TOKEN_TIME');
+    const refreshTokenTime = +this.configService.getOrThrow(
+      'JWT_REFRESH_TOKEN_TIME',
+    );
     const payload = { id: userId };
 
     if (tokenType === TokenType.ACCESS) {
