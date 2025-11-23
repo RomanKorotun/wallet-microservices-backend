@@ -6,6 +6,7 @@ import { TokenService } from '../../../infrastructure/services/token.service';
 import { CookieService } from '../../../infrastructure/services/cookie.service';
 import { SigninRequestDto } from '../../../../../modules/auth/interfaces/dto/signin/signin-request.dto';
 import { TokenType } from '../../../../../modules/auth/domain/enums/token-type.enum';
+import { SigninSuccessResponseDto } from '../../../../../modules/auth/interfaces/dto/signin/signin-success-response.dto';
 
 @Injectable()
 export class SigninUseCase {
@@ -15,7 +16,10 @@ export class SigninUseCase {
     private readonly tokenService: TokenService,
     private readonly cookieService: CookieService,
   ) {}
-  async execute(res: Response, dto: SigninRequestDto) {
+  async execute(
+    res: Response,
+    dto: SigninRequestDto,
+  ): Promise<SigninSuccessResponseDto> {
     const { email, password } = dto;
 
     const user = await this.userRepository.findByEmail(email);

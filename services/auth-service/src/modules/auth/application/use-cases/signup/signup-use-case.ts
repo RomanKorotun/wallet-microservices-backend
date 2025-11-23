@@ -6,6 +6,7 @@ import type { IUserRepository } from '../../../domain/repositiries/user.reposito
 import { TokenService } from '../../../infrastructure/services/token.service';
 import { TokenType } from '../../../domain/enums/token-type.enum';
 import { CookieService } from '../../../infrastructure/services/cookie.service';
+import { SignupSuccessResponseDto } from '../../../../../modules/auth/interfaces/dto/signup/signup-success-response.dto';
 
 @Injectable()
 export class SignupUseCase {
@@ -15,7 +16,10 @@ export class SignupUseCase {
     private readonly tokenService: TokenService,
     private readonly cookieService: CookieService,
   ) {}
-  async execute(res: Response, dto: SignupRequestDto) {
+  async execute(
+    res: Response,
+    dto: SignupRequestDto,
+  ): Promise<SignupSuccessResponseDto> {
     const { email, password } = dto;
 
     const user = await this.userRepository.findByEmail(email);

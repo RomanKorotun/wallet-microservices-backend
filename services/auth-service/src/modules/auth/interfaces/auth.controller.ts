@@ -23,6 +23,9 @@ import { SignupSuccessResponseDto } from './dto/signup/signup-success-response.d
 import { SigninSuccessResponseDto } from './dto/signin/signin-success-response.dto';
 import { CurrentSuccessResponseDto } from './dto/current/current-rsuccess-response.dto';
 import { CurrentSwagger } from './swagger/current.swagger';
+import { SignoutUseCase } from '../application/use-cases/signout/signout-use-case';
+import { SignoutSuccessResponseDto } from './dto/signout/signout-success-response.dto';
+import { SignoutSwagger } from './swagger/signout.swagger';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -30,6 +33,7 @@ export class AuthController {
   constructor(
     private readonly signupUseCase: SignupUseCase,
     private readonly signinUseCase: SigninUseCase,
+    private readonly signoutUseCase: SignoutUseCase,
   ) {}
 
   @SignupSwagger()
@@ -56,5 +60,14 @@ export class AuthController {
   @Get('current')
   current(@CurrentUser() user: DomainUser): CurrentSuccessResponseDto {
     return { id: user.id, username: user.username, email: user.email };
+  }
+
+  @SignoutSwagger()
+  @UseGuards(AuthGuard('jwt-access'))
+  @Post('signout')
+  signout(
+    @Res({ passthrough: true }) res: Response,
+  ): SignoutSuccessResponseDto {
+    return this.signoutUseCase.execute(res);
   }
 }

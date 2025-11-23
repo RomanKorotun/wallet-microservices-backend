@@ -8,6 +8,7 @@ import { TokenService } from './infrastructure/services/token.service';
 import { CookieService } from './infrastructure/services/cookie.service';
 import { SigninUseCase } from './application/use-cases/signin/signin-use-case';
 import { JwtAccessStrategy } from './infrastructure/strategies/jwt-access-strategy';
+import { SignoutUseCase } from './application/use-cases/signout/signout-use-case';
 
 @Module({
   imports: [PrismaModule],
@@ -15,6 +16,7 @@ import { JwtAccessStrategy } from './infrastructure/strategies/jwt-access-strate
   providers: [
     SignupUseCase,
     SigninUseCase,
+    SignoutUseCase,
     PasswordService,
     TokenService,
     CookieService,
