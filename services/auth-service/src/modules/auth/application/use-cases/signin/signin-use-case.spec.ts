@@ -58,6 +58,11 @@ describe('SigninUseCase', () => {
 
   const res = {} as any;
 
+  const tokens = {
+    mockAccessToken: 'accessToken',
+    mockRefreshToken: 'refreshToken',
+  };
+
   it('should throw UnauthorizedException if user does not exist', async () => {
     jest.spyOn(userRepository, 'findByEmail').mockResolvedValue(null);
     await expect(signinUseCase.execute(res, dto)).rejects.toThrow(
@@ -78,8 +83,8 @@ describe('SigninUseCase', () => {
     jest.spyOn(passwordService, 'compare').mockResolvedValue(true);
     jest
       .spyOn(tokenService, 'generate')
-      .mockReturnValueOnce('accessToken')
-      .mockReturnValueOnce('refreshToken');
+      .mockReturnValueOnce(tokens.mockAccessToken)
+      .mockReturnValueOnce(tokens.mockRefreshToken);
 
     const result = await signinUseCase.execute(res, dto);
 
@@ -97,13 +102,13 @@ describe('SigninUseCase', () => {
 
     expect(cookieServbice.setAuthCookie).toHaveBeenCalledWith(
       res,
-      'accessToken',
+      tokens.mockAccessToken,
       TokenType.ACCESS,
     );
 
     expect(cookieServbice.setAuthCookie).toHaveBeenCalledWith(
       res,
-      'refreshToken',
+      tokens.mockRefreshToken,
       TokenType.REFRESH,
     );
 

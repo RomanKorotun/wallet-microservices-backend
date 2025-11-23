@@ -6,7 +6,7 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { CurrentUnauthorizedResponseDto } from '../dto/current/current-unauthorized-response.dto';
-import { CurrentSuccessResponseDto } from '../dto/current/current-rsuccess-response.dto';
+import { CurrentSuccessResponseDto } from '../dto/current/current-success-response.dto';
 
 export const CurrentSwagger = () => {
   return applyDecorators(

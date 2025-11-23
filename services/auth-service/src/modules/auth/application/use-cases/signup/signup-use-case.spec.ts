@@ -47,16 +47,23 @@ describe('SignupUseCase', () => {
 
   const dto = { username: 'test', email: 'test@gmail.com', password: '123456' };
 
+  const hashedPassword = 'hashedPassword';
+
   const response: DomainUser = {
     id: 'test-id',
     username: 'test',
     email: 'test@gmail.com',
-    password: 'hashedPassword',
+    password: hashedPassword,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
 
   const res = {} as any;
+
+  const tokens = {
+    mockAccessToken: 'accessToken',
+    mockRefreshToken: 'refreshToken',
+  };
 
   it('should throw ConflictException if user already exists', async () => {
     jest.spyOn(userRepository, 'findByEmail').mockResolvedValue(response);
@@ -67,12 +74,12 @@ describe('SignupUseCase', () => {
 
   it('should create user and set cookies', async () => {
     jest.spyOn(userRepository, 'findByEmail').mockResolvedValue(null);
-    jest.spyOn(passwordService, 'hash').mockResolvedValue('hashedPassword');
+    jest.spyOn(passwordService, 'hash').mockResolvedValue(hashedPassword);
     jest.spyOn(userRepository, 'createUser').mockResolvedValue(response);
     jest
       .spyOn(tokenService, 'generate')
-      .mockReturnValueOnce('accessToken')
-      .mockReturnValueOnce('refreshToken');
+      .mockReturnValueOnce(tokens.mockAccessToken)
+      .mockReturnValueOnce(tokens.mockRefreshToken);
 
     const result = await signupUseCase.execute(res, dto);
 
@@ -80,7 +87,7 @@ describe('SignupUseCase', () => {
 
     expect(userRepository.createUser).toHaveBeenCalledWith({
       ...dto,
-      password: 'hashedPassword',
+      password: hashedPassword,
     });
 
     expect(tokenService.generate).toHaveBeenNthCalledWith(
@@ -97,13 +104,13 @@ describe('SignupUseCase', () => {
 
     expect(cookieService.setAuthCookie).toHaveBeenCalledWith(
       res,
-      'accessToken',
+      tokens.mockAccessToken,
       TokenType.ACCESS,
     );
 
     expect(cookieService.setAuthCookie).toHaveBeenCalledWith(
       res,
-      'refreshToken',
+      tokens.mockRefreshToken,
       TokenType.REFRESH,
     );
 

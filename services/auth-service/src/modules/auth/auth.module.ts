@@ -9,6 +9,8 @@ import { CookieService } from './infrastructure/services/cookie.service';
 import { SigninUseCase } from './application/use-cases/signin/signin-use-case';
 import { JwtAccessStrategy } from './infrastructure/strategies/jwt-access-strategy';
 import { SignoutUseCase } from './application/use-cases/signout/signout-use-case';
+import { RefreshUseCase } from './application/use-cases/refresh/refresh-use-case';
+import { JwtRefreshStrategy } from './infrastructure/strategies/jwt-refresh-strategy';
 
 @Module({
   imports: [PrismaModule],
@@ -16,11 +18,13 @@ import { SignoutUseCase } from './application/use-cases/signout/signout-use-case
   providers: [
     SignupUseCase,
     SigninUseCase,
+    RefreshUseCase,
     SignoutUseCase,
     PasswordService,
     TokenService,
     CookieService,
     JwtAccessStrategy,
+    JwtRefreshStrategy,
     { provide: 'IUserRepository', useClass: UserRepository },
   ],
 })

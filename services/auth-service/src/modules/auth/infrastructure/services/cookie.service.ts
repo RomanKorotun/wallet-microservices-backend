@@ -29,8 +29,12 @@ export class CookieService {
   }
 
   setAuthCookie(res: Response, token: string, tokenType: TokenType): void {
-    const accessTokenTime = +this.configService.get('JWT_ACCESS_TOKEN_TIME');
-    const refreshTokenTime = +this.configService.get('JWT_REFRESH_TOKEN_TIME');
+    const accessTokenTime = +this.configService.getOrThrow(
+      'JWT_ACCESS_TOKEN_TIME',
+    );
+    const refreshTokenTime = +this.configService.getOrThrow(
+      'JWT_REFRESH_TOKEN_TIME',
+    );
 
     const cookieOptions = this.getCookieOptions();
 
