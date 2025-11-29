@@ -40,11 +40,36 @@ services:
       timeout: 5s
       retries: 5
 
+  postgres-auth-test:
+    container_name: postgres-auth-test
+    image: postgres:18-alpine
+    ports:
+      - 5434:5432
+    volumes:
+      - pgdata-auth-test:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER_AUTH_TEST}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_AUTH_TEST}
+      POSTGRES_DB: ${POSTGRES_DB_AUTH_TEST}
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "pg_isready",
+          "-U",
+          "${POSTGRES_USER_AUTH_TEST}",
+          "-d",
+          "${POSTGRES_DB_AUTH_TEST}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   postgres-wallet:
     container_name: postgres-wallet
     image: postgres:18-alpine
     ports:
-      - 5434:5432
+      - 5435:5432
     volumes:
       - pgdata-wallet:/var/lib/postgresql/data
     environment:
@@ -79,5 +104,6 @@ services:
 
 volumes:
   pgdata-auth:
+  pgdata-auth-test:
   pgdata-wallet:
   rabbitmq_data:

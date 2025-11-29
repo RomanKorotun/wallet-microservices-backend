@@ -3,6 +3,7 @@ import { Response } from 'express';
 import { CookieService } from '../../../../../modules/auth/infrastructure/services/cookie.service';
 import { TokenService } from '../../../../../modules/auth/infrastructure/services/token.service';
 import { TokenType } from '../../../../../modules/auth/domain/enums/token-type.enum';
+import { RefreshSuccessResponseDto } from '../../../../../modules/auth/interfaces/dto/refresh/refresh-success-response.dto';
 
 @Injectable()
 export class RefreshUseCase {
@@ -10,7 +11,7 @@ export class RefreshUseCase {
     private readonly tokenService: TokenService,
     private readonly cookieService: CookieService,
   ) {}
-  execute(res: Response, userId: string) {
+  execute(res: Response, userId: string): RefreshSuccessResponseDto {
     const accessToken = this.tokenService.generate(userId, TokenType.ACCESS);
     const refreshToken = this.tokenService.generate(userId, TokenType.REFRESH);
     this.cookieService.setAuthCookie(res, accessToken, TokenType.ACCESS);

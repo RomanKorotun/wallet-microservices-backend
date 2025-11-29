@@ -5,4 +5,5 @@ export interface IUserRepository {
   createUser(props: ICreateUserProps): Promise<DomainUser>;
   findByEmail(email: string): Promise<DomainUser | null>;
   findById(id: string): Promise<DomainUser | null>;
+  deleteAll(): Promise<void>;
 }

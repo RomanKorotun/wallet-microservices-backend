@@ -41,4 +41,17 @@ export class TokenService {
 
     throw new InternalServerErrorException('Недопустимий тип токена');
   }
+
+  decode(token: string, tokenType: TokenType) {
+    try {
+      const secret =
+        tokenType === TokenType.ACCESS
+          ? this.configService.getOrThrow('JWT_ACCESS_TOKEN_SECRET')
+          : this.configService.getOrThrow('JWT_REFRESH_TOKEN_SECRET');
+
+      return this.jwtService.verify(token, { secret });
+    } catch {
+      throw new InternalServerErrorException('Неможливо декодувати токен');
+    }
+  }
 }
