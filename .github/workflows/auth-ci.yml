@@ -63,7 +63,6 @@ jobs:
 
     env:
       NODE_ENV: test
-      POSTGRES_DB: ${{ secrets.POSTGRES_DB_AUTH_TEST }}
       DATABASE_URL: postgresql://${{ secrets.POSTGRES_USER_AUTH_TEST }}:${{ secrets.POSTGRES_PASSWORD_AUTH_TEST }}@localhost:5434/${{ secrets.POSTGRES_DB_AUTH_TEST }}?schema=public
       JWT_ACCESS_TOKEN_SECRET: ${{ secrets.JWT_ACCESS_TOKEN_SECRET }}
       JWT_REFRESH_TOKEN_SECRET: ${{ secrets.JWT_REFRESH_TOKEN_SECRET }}
