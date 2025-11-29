@@ -61,27 +61,30 @@ jobs:
     runs-on: ubuntu-latest
     needs: unit-tests
 
-    services:
-      postgres:
-        image: postgres:18
-        env:
-          POSTGRES_USER: ${{ secrets.POSTGRES_USER_AUTH_TEST }}
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD_AUTH_TEST }}
-          POSTGRES_DB: ${{ secrets.POSTGRES_DB_AUTH_TEST }}
-        ports:
-          - 5434:5432
-        options: >-
-          --health-cmd="pg_isready -U ${{ secrets.POSTGRES_USER_AUTH_TEST }} -d ${{ secrets.POSTGRES_DB_AUTH_TEST }}"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
     env:
       NODE_ENV: test
+      POSTGRES_USER_AUTH_TEST: ${{ secrets.POSTGRES_USER_AUTH_TEST }}
+      POSTGRES_DB_AUTH_TEST: ${{ secrets.POSTGRES_DB_AUTH_TEST }}
       DATABASE_URL: postgresql://${{ secrets.POSTGRES_USER_AUTH_TEST }}:${{ secrets.POSTGRES_PASSWORD_AUTH_TEST }}@localhost:5434/${{ secrets.POSTGRES_DB_AUTH_TEST }}?schema=public
       JWT_ACCESS_TOKEN_SECRET: ${{ secrets.JWT_ACCESS_TOKEN_SECRET }}
       JWT_REFRESH_TOKEN_SECRET: ${{ secrets.JWT_REFRESH_TOKEN_SECRET }}
       JWT_ACCESS_TOKEN_TIME: ${{ secrets.JWT_ACCESS_TOKEN_TIME }}
       JWT_REFRESH_TOKEN_TIME: ${{ secrets.JWT_REFRESH_TOKEN_TIME }}
+
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: ${{ env.POSTGRES_USER_AUTH_TEST }}
+          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD_AUTH_TEST }}
+          POSTGRES_DB: ${{ env.POSTGRES_DB_AUTH_TEST }}
+        ports:
+          - 5434:5432
+        options: >-
+          --health-cmd="pg_isready -U ${{ env.POSTGRES_USER_AUTH_TEST }} -d ${{ env.POSTGRES_DB_AUTH_TEST }}"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
     steps:
       - name: Clone repository
