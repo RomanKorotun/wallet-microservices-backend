@@ -72,7 +72,19 @@ describe('SignupUseCase', () => {
     );
   });
 
-  it('should create user and set cookies', async () => {
+  it('should hash password', async () => {
+    jest.spyOn(userRepository, 'findByEmail').mockResolvedValue(null);
+    jest.spyOn(passwordService, 'hash').mockResolvedValue(hashedPassword);
+    jest.spyOn(userRepository, 'createUser').mockResolvedValue(response);
+    jest
+      .spyOn(tokenService, 'generate')
+      .mockReturnValueOnce(tokens.mockAccessToken)
+      .mockReturnValueOnce(tokens.mockRefreshToken);
+    await signupUseCase.execute(res, dto);
+    expect(passwordService.hash).toHaveBeenCalledWith(dto.password);
+  });
+
+  it('should save user with hashed password', async () => {
     jest.spyOn(userRepository, 'findByEmail').mockResolvedValue(null);
     jest.spyOn(passwordService, 'hash').mockResolvedValue(hashedPassword);
     jest.spyOn(userRepository, 'createUser').mockResolvedValue(response);
@@ -81,14 +93,24 @@ describe('SignupUseCase', () => {
       .mockReturnValueOnce(tokens.mockAccessToken)
       .mockReturnValueOnce(tokens.mockRefreshToken);
 
-    const result = await signupUseCase.execute(res, dto);
-
-    expect(passwordService.hash).toHaveBeenCalledWith(dto.password);
+    await signupUseCase.execute(res, dto);
 
     expect(userRepository.createUser).toHaveBeenCalledWith({
       ...dto,
       password: hashedPassword,
     });
+  });
+
+  it('should call tokenService.generate twice with correct token types', async () => {
+    jest.spyOn(userRepository, 'findByEmail').mockResolvedValue(null);
+    jest.spyOn(passwordService, 'hash').mockResolvedValue(hashedPassword);
+    jest.spyOn(userRepository, 'createUser').mockResolvedValue(response);
+    jest
+      .spyOn(tokenService, 'generate')
+      .mockReturnValueOnce(tokens.mockAccessToken)
+      .mockReturnValueOnce(tokens.mockRefreshToken);
+
+    await signupUseCase.execute(res, dto);
 
     expect(tokenService.generate).toHaveBeenNthCalledWith(
       1,
@@ -101,6 +123,18 @@ describe('SignupUseCase', () => {
       response.id,
       TokenType.REFRESH,
     );
+  });
+
+  it('should set access and refresh tokens in cookies', async () => {
+    jest.spyOn(userRepository, 'findByEmail').mockResolvedValue(null);
+    jest.spyOn(passwordService, 'hash').mockResolvedValue(hashedPassword);
+    jest.spyOn(userRepository, 'createUser').mockResolvedValue(response);
+    jest
+      .spyOn(tokenService, 'generate')
+      .mockReturnValueOnce(tokens.mockAccessToken)
+      .mockReturnValueOnce(tokens.mockRefreshToken);
+
+    await signupUseCase.execute(res, dto);
 
     expect(cookieService.setAuthCookie).toHaveBeenCalledWith(
       res,
@@ -113,6 +147,18 @@ describe('SignupUseCase', () => {
       tokens.mockRefreshToken,
       TokenType.REFRESH,
     );
+  });
+
+  it('should return user object with correct fields', async () => {
+    jest.spyOn(userRepository, 'findByEmail').mockResolvedValue(null);
+    jest.spyOn(passwordService, 'hash').mockResolvedValue(hashedPassword);
+    jest.spyOn(userRepository, 'createUser').mockResolvedValue(response);
+    jest
+      .spyOn(tokenService, 'generate')
+      .mockReturnValueOnce(tokens.mockAccessToken)
+      .mockReturnValueOnce(tokens.mockRefreshToken);
+
+    const result = await signupUseCase.execute(res, dto);
 
     expect(result).toEqual({
       message: 'Access Token i Refresh Token встановлені в кукі',

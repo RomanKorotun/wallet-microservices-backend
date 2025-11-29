@@ -40,4 +40,8 @@ export class UserRepository implements IUserRepository {
     }
     return this.mapToDomain(user);
   }
+
+  async deleteAll(): Promise<void> {
+    await this.prismaService.user.deleteMany({});
+  }
 }

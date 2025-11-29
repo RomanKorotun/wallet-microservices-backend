@@ -28,6 +28,7 @@ import { SignoutSuccessResponseDto } from './dto/signout/signout-success-respons
 import { SignoutSwagger } from './swagger/signout.swagger';
 import { RefreshUseCase } from '../application/use-cases/refresh/refresh-use-case';
 import { RefreshSwagger } from './swagger/refresh.swagger';
+import { RefreshSuccessResponseDto } from './dto/refresh/refresh-success-response.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -72,7 +73,7 @@ export class AuthController {
   refresh(
     @Res({ passthrough: true }) res: Response,
     @CurrentUser() user: DomainUser,
-  ) {
+  ): RefreshSuccessResponseDto {
     return this.refreshUseCase.execute(res, user.id);
   }
 
