@@ -80,7 +80,7 @@ jobs:
         ports:
           - 5434:5432
         options: >-
-          --health-cmd="pg_isready -U ${{ secrets.POSTGRES_USER_AUTH_TEST }} -d ${{ secrets.POSTGRES_DB_AUTH_TEST}}"
+          --health-cmd="pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
