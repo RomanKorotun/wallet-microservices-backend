@@ -1,20 +1,21 @@
 import { ConflictException, Inject, Injectable } from '@nestjs/common';
 import type { Response } from 'express';
-import { PasswordService } from '../../../infrastructure/services/password.service';
 import { SignupRequestDto } from '../../../interfaces/dto/signup/signup-request.dto';
 import type { IUserRepository } from '../../../domain/repositiries/user.repository';
-import { TokenService } from '../../../infrastructure/services/token.service';
 import { TokenType } from '../../../domain/enums/token-type.enum';
-import { CookieService } from '../../../infrastructure/services/cookie.service';
 import { SignupSuccessResponseDto } from '../../../../../modules/auth/interfaces/dto/signup/signup-success-response.dto';
+import type { ICookieService } from '../../../../../modules/auth/domain/services/cookie.service';
+import type { IPasswordService } from '../../../../../modules/auth/domain/services/password.service';
+import type { ITokenService } from '../../../../../modules/auth/domain/services/token.service';
 
 @Injectable()
 export class SignupUseCase {
   constructor(
-    private readonly passwordService: PasswordService,
+    @Inject('IPasswordService')
+    private readonly passwordService: IPasswordService,
     @Inject('IUserRepository') private readonly userRepository: IUserRepository,
-    private readonly tokenService: TokenService,
-    private readonly cookieService: CookieService,
+    @Inject('ITokenService') private readonly tokenService: ITokenService,
+    @Inject('ICookieService') private readonly cookieService: ICookieService,
   ) {}
   async execute(
     res: Response,

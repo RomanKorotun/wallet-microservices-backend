@@ -1,25 +1,25 @@
 import { Test } from '@nestjs/testing';
-import { CookieService } from '../../../../../modules/auth/infrastructure/services/cookie.service';
 import { SignoutUseCase } from './signout-use-case';
 import { TokenType } from '../../../../../modules/auth/domain/enums/token-type.enum';
+import type { ICookieService } from '../../../../../modules/auth/domain/services/cookie.service';
 
 describe('Signout', () => {
   let signoutUseCase: SignoutUseCase;
-  let cookieService: CookieService;
+  let cookieService: ICookieService;
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
       providers: [
         SignoutUseCase,
         {
-          provide: CookieService,
+          provide: 'ICookieService',
           useValue: { clearAuthCookie: jest.fn() },
         },
       ],
     }).compile();
 
     signoutUseCase = module.get(SignoutUseCase);
-    cookieService = module.get(CookieService);
+    cookieService = module.get('ICookieService');
   });
 
   const res = {} as any;

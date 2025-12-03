@@ -3,17 +3,15 @@ import {
   Catch,
   ExceptionFilter,
   HttpException,
+  Injectable,
   Logger,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 
 @Catch()
+@Injectable()
 export class AllExceptionFilter implements ExceptionFilter {
-  private readonly logger: Logger;
-
-  constructor() {
-    this.logger = new Logger(AllExceptionFilter.name);
-  }
+  private readonly logger = new Logger(AllExceptionFilter.name);
 
   catch(exception: unknown, host: ArgumentsHost) {
     const status: number =

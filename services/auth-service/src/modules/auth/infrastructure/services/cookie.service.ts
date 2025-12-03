@@ -2,9 +2,10 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CookieOptions, Response } from 'express';
 import { TokenType } from '../../domain/enums/token-type.enum';
+import { ICookieService } from '../../domain/services/cookie.service';
 
 @Injectable()
-export class CookieService {
+export class CookieService implements ICookieService {
   private readonly ACCESS_TOKEN = 'accessToken';
   private readonly REFRESH_TOKEN = 'refreshToken';
 
