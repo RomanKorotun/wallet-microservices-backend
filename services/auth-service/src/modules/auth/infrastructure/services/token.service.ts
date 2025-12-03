@@ -2,9 +2,11 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { TokenType } from '../../domain/enums/token-type.enum';
+import type { ITokenService } from '../../domain/services/token.service';
+import type { IJwtPayload } from '../../domain/types/jwt-payload.interface';
 
 @Injectable()
-export class TokenService {
+export class TokenService implements ITokenService {
   constructor(
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
@@ -42,7 +44,7 @@ export class TokenService {
     throw new InternalServerErrorException('Недопустимий тип токена');
   }
 
-  decode(token: string, tokenType: TokenType) {
+  decode(token: string, tokenType: TokenType): IJwtPayload {
     try {
       const secret =
         tokenType === TokenType.ACCESS

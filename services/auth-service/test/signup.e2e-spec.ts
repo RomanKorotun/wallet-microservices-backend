@@ -1,22 +1,22 @@
 import request from 'supertest';
 import { ConfigService } from '@nestjs/config';
 import { createTestApp, ITestAppContext } from './test-app';
-import { IUserRepository } from '../src/modules/auth/domain/repositiries/user.repository';
-import { TokenService } from '../src/modules/auth/infrastructure/services/token.service';
+import type { IUserRepository } from '../src/modules/auth/domain/repositiries/user.repository';
 import { TokenType } from '../src/modules/auth/domain/enums/token-type.enum';
 import { getCookies } from './helpers/cookies';
 import { getToken } from './helpers/tokens';
+import type { ITokenService } from '../src/modules/auth/domain/services/token.service';
 
 describe('AuthController e2e - signup', () => {
   let ctx: ITestAppContext;
   let userRepository: IUserRepository;
-  let tokenService: TokenService;
+  let tokenService: ITokenService;
   let configService: ConfigService;
 
   beforeAll(async () => {
     ctx = await createTestApp();
     userRepository = ctx.app.get('IUserRepository');
-    tokenService = ctx.app.get(TokenService);
+    tokenService = ctx.app.get('ITokenService');
     configService = ctx.app.get(ConfigService);
   });
 

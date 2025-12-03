@@ -1,26 +1,26 @@
 import { Test } from '@nestjs/testing';
-import { IUserRepository } from 'src/modules/auth/domain/repositiries/user.repository';
-import { PasswordService } from '../../../infrastructure/services/password.service';
-import { SigninUseCase } from './signin-use-case';
-import { TokenService } from '../../../infrastructure/services/token.service';
-import { CookieService } from '../../../infrastructure/services/cookie.service';
-import { DomainUser } from '../../../../../modules/auth/domain/entities/user';
 import { UnauthorizedException } from '@nestjs/common';
+import type { IUserRepository } from '../../../../../modules/auth/domain/repositiries/user.repository';
+import { SigninUseCase } from './signin-use-case';
+import { DomainUser } from '../../../../../modules/auth/domain/entities/user';
 import { TokenType } from '../../../../../modules/auth/domain/enums/token-type.enum';
+import type { ICookieService } from '../../../../../modules/auth/domain/services/cookie.service';
+import type { IPasswordService } from '../../../../../modules/auth/domain/services/password.service';
+import type { ITokenService } from '../../../../../modules/auth/domain/services/token.service';
 
 describe('SigninUseCase', () => {
   let signinUseCase: SigninUseCase;
-  let passwordService: PasswordService;
+  let passwordService: IPasswordService;
   let userRepository: IUserRepository;
-  let tokenService: TokenService;
-  let cookieServbice: CookieService;
+  let tokenService: ITokenService;
+  let cookieServbice: ICookieService;
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
       providers: [
         SigninUseCase,
         {
-          provide: PasswordService,
+          provide: 'IPasswordService',
           useValue: { compare: jest.fn() },
         },
         {
@@ -28,21 +28,21 @@ describe('SigninUseCase', () => {
           useValue: { findByEmail: jest.fn() },
         },
         {
-          provide: TokenService,
+          provide: 'ITokenService',
           useValue: { generate: jest.fn() },
         },
         {
-          provide: CookieService,
+          provide: 'ICookieService',
           useValue: { setAuthCookie: jest.fn() },
         },
       ],
     }).compile();
 
     signinUseCase = module.get(SigninUseCase);
-    passwordService = module.get(PasswordService);
+    passwordService = module.get('IPasswordService');
     userRepository = module.get('IUserRepository');
-    tokenService = module.get(TokenService);
-    cookieServbice = module.get(CookieService);
+    tokenService = module.get('ITokenService');
+    cookieServbice = module.get('ICookieService');
   });
 
   const dto = { email: 'test@gmail.com', password: '123456' };

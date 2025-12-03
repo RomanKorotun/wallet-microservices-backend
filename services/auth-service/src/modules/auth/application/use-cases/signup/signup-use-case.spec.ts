@@ -1,26 +1,26 @@
 import { Test } from '@nestjs/testing';
-import { IUserRepository } from '../../../domain/repositiries/user.repository';
-import { CookieService } from '../../../infrastructure/services/cookie.service';
-import { PasswordService } from '../../../infrastructure/services/password.service';
-import { TokenService } from '../../../infrastructure/services/token.service';
-import { SignupUseCase } from './signup-use-case';
 import { ConflictException } from '@nestjs/common';
+import type { IUserRepository } from '../../../domain/repositiries/user.repository';
+import { SignupUseCase } from './signup-use-case';
 import { DomainUser } from '../../../domain/entities/user';
 import { TokenType } from '../../../domain/enums/token-type.enum';
+import type { ICookieService } from '../../../../../modules/auth/domain/services/cookie.service';
+import type { IPasswordService } from '../../../../../modules/auth/domain/services/password.service';
+import type { ITokenService } from '../../../../../modules/auth/domain/services/token.service';
 
 describe('SignupUseCase', () => {
   let signupUseCase: SignupUseCase;
-  let passwordService: PasswordService;
+  let passwordService: IPasswordService;
   let userRepository: IUserRepository;
-  let tokenService: TokenService;
-  let cookieService: CookieService;
+  let tokenService: ITokenService;
+  let cookieService: ICookieService;
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
       providers: [
         SignupUseCase,
         {
-          provide: PasswordService,
+          provide: 'IPasswordService',
           useValue: { hash: jest.fn() },
         },
         {
@@ -28,21 +28,21 @@ describe('SignupUseCase', () => {
           useValue: { createUser: jest.fn(), findByEmail: jest.fn() },
         },
         {
-          provide: TokenService,
+          provide: 'ITokenService',
           useValue: { generate: jest.fn() },
         },
         {
-          provide: CookieService,
+          provide: 'ICookieService',
           useValue: { setAuthCookie: jest.fn() },
         },
       ],
     }).compile();
 
     signupUseCase = module.get(SignupUseCase);
-    passwordService = module.get(PasswordService);
+    passwordService = module.get('IPasswordService');
     userRepository = module.get('IUserRepository');
-    tokenService = module.get(TokenService);
-    cookieService = module.get(CookieService);
+    tokenService = module.get('ITokenService');
+    cookieService = module.get('ICookieService');
   });
 
   const dto = { username: 'test', email: 'test@gmail.com', password: '123456' };

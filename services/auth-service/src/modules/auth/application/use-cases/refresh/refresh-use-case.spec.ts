@@ -1,32 +1,32 @@
 import { Test } from '@nestjs/testing';
-import { TokenService } from '../../../../../modules/auth/infrastructure/services/token.service';
 import { RefreshUseCase } from './refresh-use-case';
-import { CookieService } from '../../../../../modules/auth/infrastructure/services/cookie.service';
 import { TokenType } from '../../../../../modules/auth/domain/enums/token-type.enum';
+import type { ICookieService } from '../../../../../modules/auth/domain/services/cookie.service';
+import type { ITokenService } from 'src/modules/auth/domain/services/token.service';
 
 describe('Refresh', () => {
   let refreshUseCase: RefreshUseCase;
-  let tokenService: TokenService;
-  let cookieService: CookieService;
+  let tokenService: ITokenService;
+  let cookieService: ICookieService;
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
       providers: [
         RefreshUseCase,
         {
-          provide: TokenService,
+          provide: 'ITokenService',
           useValue: { generate: jest.fn() },
         },
         {
-          provide: CookieService,
+          provide: 'ICookieService',
           useValue: { setAuthCookie: jest.fn() },
         },
       ],
     }).compile();
 
     refreshUseCase = module.get(RefreshUseCase);
-    tokenService = module.get(TokenService);
-    cookieService = module.get(CookieService);
+    tokenService = module.get('ITokenService');
+    cookieService = module.get('ICookieService');
   });
 
   const res = {} as any;
