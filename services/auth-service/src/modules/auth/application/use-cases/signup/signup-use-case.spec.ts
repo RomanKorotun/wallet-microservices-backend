@@ -101,7 +101,7 @@ describe('SignupUseCase', () => {
     });
   });
 
-  it('should call tokenService.generate twice with correct token types', async () => {
+  it('should generate access and refresh tokens with correct types', async () => {
     jest.spyOn(userRepository, 'findByEmail').mockResolvedValue(null);
     jest.spyOn(passwordService, 'hash').mockResolvedValue(hashedPassword);
     jest.spyOn(userRepository, 'createUser').mockResolvedValue(response);

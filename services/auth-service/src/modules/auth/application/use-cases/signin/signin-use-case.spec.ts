@@ -13,7 +13,7 @@ describe('SigninUseCase', () => {
   let passwordService: IPasswordService;
   let userRepository: IUserRepository;
   let tokenService: ITokenService;
-  let cookieServbice: ICookieService;
+  let cookieService: ICookieService;
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
@@ -42,7 +42,7 @@ describe('SigninUseCase', () => {
     passwordService = module.get('IPasswordService');
     userRepository = module.get('IUserRepository');
     tokenService = module.get('ITokenService');
-    cookieServbice = module.get('ICookieService');
+    cookieService = module.get('ICookieService');
   });
 
   const dto = { email: 'test@gmail.com', password: '123456' };
@@ -78,7 +78,7 @@ describe('SigninUseCase', () => {
     );
   });
 
-  it('should authenticate user and set cookies', async () => {
+  it('should generate access and refresh tokens with correct types', async () => {
     jest.spyOn(userRepository, 'findByEmail').mockResolvedValue(response);
     jest.spyOn(passwordService, 'compare').mockResolvedValue(true);
     jest
@@ -86,7 +86,7 @@ describe('SigninUseCase', () => {
       .mockReturnValueOnce(tokens.mockAccessToken)
       .mockReturnValueOnce(tokens.mockRefreshToken);
 
-    const result = await signinUseCase.execute(res, dto);
+    await signinUseCase.execute(res, dto);
 
     expect(tokenService.generate).toHaveBeenNthCalledWith(
       1,
@@ -99,18 +99,40 @@ describe('SigninUseCase', () => {
       response.id,
       TokenType.REFRESH,
     );
+  });
 
-    expect(cookieServbice.setAuthCookie).toHaveBeenCalledWith(
+  it('should set access and refresh tokens in cookies', async () => {
+    jest.spyOn(userRepository, 'findByEmail').mockResolvedValue(response);
+    jest.spyOn(passwordService, 'compare').mockResolvedValue(true);
+    jest
+      .spyOn(tokenService, 'generate')
+      .mockReturnValueOnce(tokens.mockAccessToken)
+      .mockReturnValueOnce(tokens.mockRefreshToken);
+
+    await signinUseCase.execute(res, dto);
+
+    expect(cookieService.setAuthCookie).toHaveBeenCalledWith(
       res,
       tokens.mockAccessToken,
       TokenType.ACCESS,
     );
 
-    expect(cookieServbice.setAuthCookie).toHaveBeenCalledWith(
+    expect(cookieService.setAuthCookie).toHaveBeenCalledWith(
       res,
       tokens.mockRefreshToken,
       TokenType.REFRESH,
     );
+  });
+
+  it('should return user object with correct fields', async () => {
+    jest.spyOn(userRepository, 'findByEmail').mockResolvedValue(response);
+    jest.spyOn(passwordService, 'compare').mockResolvedValue(true);
+    jest
+      .spyOn(tokenService, 'generate')
+      .mockReturnValueOnce(tokens.mockAccessToken)
+      .mockReturnValueOnce(tokens.mockRefreshToken);
+
+    const result = await signinUseCase.execute(res, dto);
 
     expect(result).toEqual({
       message: 'Access Token i Refresh Token встановлені в кукі',
