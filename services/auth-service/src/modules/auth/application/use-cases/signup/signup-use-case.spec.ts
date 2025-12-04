@@ -45,7 +45,11 @@ describe('SignupUseCase', () => {
     cookieService = module.get('ICookieService');
   });
 
-  const dto = { username: 'test', email: 'test@gmail.com', password: '123456' };
+  const dto = {
+    username: 'test',
+    email: 'test@gmail.com',
+    password: 'R123456',
+  };
 
   const hashedPassword = 'hashedPassword';
 

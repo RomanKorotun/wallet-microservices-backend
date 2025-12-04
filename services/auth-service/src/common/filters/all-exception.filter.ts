@@ -40,7 +40,7 @@ export class AllExceptionFilter implements ExceptionFilter {
       }
     }
 
-    this.logger.error(message, exception);
+    // this.logger.error(message, exception);
 
     response.status(status).json({
       status,
