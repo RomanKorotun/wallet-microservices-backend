@@ -45,7 +45,7 @@ describe('SigninUseCase', () => {
     cookieService = module.get('ICookieService');
   });
 
-  const dto = { email: 'test@gmail.com', password: '123456' };
+  const dto = { email: 'test@gmail.com', password: 'R123456' };
 
   const response: DomainUser = {
     id: 'test-id',
