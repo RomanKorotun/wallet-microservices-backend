@@ -1,20 +1,23 @@
-import request from 'supertest';
 import { ConfigService } from '@nestjs/config';
+import { Server } from 'http';
 import type { IUserRepository } from '../../../src/modules/auth/domain/repositiries/user.repository';
 import { TokenType } from '../../../src/modules/auth/domain/enums/token-type.enum';
-import { getCookies } from './helpers/cookies';
-import { getToken } from './helpers/tokens';
+import { getCookies } from './helpers/cookies.helper';
+import { getToken } from './helpers/tokens.helper';
 import type { ITokenService } from '../../../src/modules/auth/domain/services/token.service';
 import { createTestApp, ITestApp } from './helpers/test-app';
+import { postRequest } from './helpers/request.helper';
 
 describe('AuthController e2e - signup', () => {
   let testApp: ITestApp;
+  let server: Server;
   let userRepository: IUserRepository;
   let tokenService: ITokenService;
   let configService: ConfigService;
 
   beforeAll(async () => {
     testApp = await createTestApp();
+    server = testApp.server;
     userRepository = testApp.app.get('IUserRepository');
     tokenService = testApp.app.get('ITokenService');
     configService = testApp.app.get(ConfigService);
@@ -54,93 +57,101 @@ describe('AuthController e2e - signup', () => {
   const urlSignup = '/api/auth/signup';
 
   it('should return 400 if body is empty', async () => {
-    const { statusCode } = await request(testApp.server)
-      .post(urlSignup)
-      .send({});
+    const { statusCode } = await postRequest(server, urlSignup, {});
     expect(statusCode).toBe(400);
   });
 
   it('should return 400 if username is missing', async () => {
-    const { statusCode } = await request(testApp.server)
-      .post(urlSignup)
-      .send(invalidUsername.missing);
+    const { statusCode } = await postRequest(
+      server,
+      urlSignup,
+      invalidUsername.missing,
+    );
     expect(statusCode).toBe(400);
   });
 
   it('should return 400 if username is not a string', async () => {
-    const { statusCode } = await request(testApp.server)
-      .post(urlSignup)
-      .send(invalidUsername.notString);
+    const { statusCode } = await postRequest(
+      server,
+      urlSignup,
+      invalidUsername.notString,
+    );
     expect(statusCode).toBe(400);
   });
 
   it('should return 400 if username is short', async () => {
-    const { statusCode } = await request(testApp.server)
-      .post(urlSignup)
-      .send(invalidUsername.tooShort);
+    const { statusCode } = await postRequest(
+      server,
+      urlSignup,
+      invalidUsername.tooShort,
+    );
     expect(statusCode).toBe(400);
   });
 
   it('should return 400 if username is long', async () => {
-    const { statusCode } = await request(testApp.server)
-      .post(urlSignup)
-      .send(invalidUsername.tooLong);
+    const { statusCode } = await postRequest(
+      server,
+      urlSignup,
+      invalidUsername.tooLong,
+    );
     expect(statusCode).toBe(400);
   });
 
   it('should return 400 if email is missing', async () => {
-    const { statusCode } = await request(testApp.server)
-      .post(urlSignup)
-      .send(invalidEmail.missing);
+    const { statusCode } = await postRequest(
+      server,
+      urlSignup,
+      invalidEmail.missing,
+    );
     expect(statusCode).toBe(400);
   });
 
   it('should return 400 if email is invalid', async () => {
-    const { statusCode } = await request(testApp.server)
-      .post(urlSignup)
-      .send(invalidEmail.invalid);
+    const { statusCode } = await postRequest(
+      server,
+      urlSignup,
+      invalidEmail.invalid,
+    );
     expect(statusCode).toBe(400);
   });
 
   it('should return 400 if password is missing', async () => {
-    const { statusCode } = await request(testApp.server)
-      .post(urlSignup)
-      .send(invalidPassword.missing);
+    const { statusCode } = await postRequest(
+      server,
+      urlSignup,
+      invalidPassword.missing,
+    );
     expect(statusCode).toBe(400);
   });
 
   it('should return 400 if password is invalid', async () => {
-    const { statusCode } = await request(testApp.server)
-      .post(urlSignup)
-      .send(invalidPassword.invalid);
+    const { statusCode } = await postRequest(
+      server,
+      urlSignup,
+      invalidPassword.invalid,
+    );
     expect(statusCode).toBe(400);
   });
 
   it('should return 409 if user with same email exists', async () => {
-    await request(testApp.server).post(urlSignup).send(signupDto);
-    const { statusCode } = await request(testApp.server)
-      .post(urlSignup)
-      .send(signupDto);
+    await postRequest(server, urlSignup, signupDto);
+    const { statusCode } = await postRequest(server, urlSignup, signupDto);
     expect(statusCode).toBe(409);
   });
 
   it('should create user in database', async () => {
-    await request(testApp.server).post(urlSignup).send(signupDto);
+    await postRequest(server, urlSignup, signupDto);
     const user = await userRepository.findByEmail(signupDto.email);
     expect(user).toBeTruthy();
   });
 
   it('should return status 201', async () => {
-    const { statusCode } = await request(testApp.server)
-      .post(urlSignup)
-      .send(signupDto);
+    const { statusCode } = await postRequest(server, urlSignup, signupDto);
     expect(statusCode).toBe(201);
   });
 
   it('should return user object with correct fields', async () => {
-    const response = await request(testApp.server)
-      .post(urlSignup)
-      .send(signupDto);
+    const response = await postRequest(server, urlSignup, signupDto);
     expect(response.body).toEqual({
       message: 'Access Token i Refresh Token встановлені в кукі',
       user: {
@@ -152,9 +163,7 @@ describe('AuthController e2e - signup', () => {
   });
 
   it('should have valid payload in accessToken', async () => {
-    const response = await request(testApp.server)
-      .post(urlSignup)
-      .send(signupDto);
+    const response = await postRequest(server, urlSignup, signupDto);
     const cookiesArray: string[] = getCookies(response);
     const accessToken = getToken(cookiesArray, TokenType.ACCESS);
     const payload = tokenService.decode(accessToken, TokenType.ACCESS);
@@ -162,9 +171,7 @@ describe('AuthController e2e - signup', () => {
   });
 
   it('should have valid payload in refreshToken', async () => {
-    const response = await request(testApp.server)
-      .post(urlSignup)
-      .send(signupDto);
+    const response = await postRequest(server, urlSignup, signupDto);
     const cookiesArray: string[] = getCookies(response);
     const refreshToken = getToken(cookiesArray, TokenType.REFRESH);
     const payload = tokenService.decode(refreshToken, TokenType.REFRESH);
@@ -172,9 +179,7 @@ describe('AuthController e2e - signup', () => {
   });
 
   it('should set accessToken and refreshToken cookies', async () => {
-    const response = await request(testApp.server)
-      .post(urlSignup)
-      .send(signupDto);
+    const response = await postRequest(server, urlSignup, signupDto);
     const cookiesArray: string[] = getCookies(response);
     expect(cookiesArray.some((c: string) => c.startsWith('accessToken'))).toBe(
       true,
@@ -185,9 +190,7 @@ describe('AuthController e2e - signup', () => {
   });
 
   it('should set cookies with security attributes', async () => {
-    const response = await request(testApp.server)
-      .post(urlSignup)
-      .send(signupDto);
+    const response = await postRequest(server, urlSignup, signupDto);
     const cookiesArray: string[] = getCookies(response);
     expect(cookiesArray.every((c) => c.includes('HttpOnly'))).toBe(true);
     if (configService.getOrThrow('NODE_ENV') === 'production') {
