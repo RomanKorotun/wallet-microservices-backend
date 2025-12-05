@@ -1,4 +1,5 @@
 import { Test } from '@nestjs/testing';
+import { Response } from 'express';
 import { ConflictException } from '@nestjs/common';
 import type { IUserRepository } from '../../../domain/repositiries/user.repository';
 import { SignupUseCase } from './signup-use-case';
@@ -62,7 +63,7 @@ describe('SignupUseCase', () => {
     updatedAt: new Date(),
   };
 
-  const res = {} as any;
+  const res = {} as Response;
 
   const tokens = {
     mockAccessToken: 'accessToken',
@@ -139,6 +140,8 @@ describe('SignupUseCase', () => {
       .mockReturnValueOnce(tokens.mockRefreshToken);
 
     await signupUseCase.execute(res, dto);
+
+    expect(cookieService.setAuthCookie).toHaveBeenCalledTimes(2);
 
     expect(cookieService.setAuthCookie).toHaveBeenCalledWith(
       res,

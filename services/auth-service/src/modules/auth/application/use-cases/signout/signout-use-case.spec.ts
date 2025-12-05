@@ -1,9 +1,10 @@
 import { Test } from '@nestjs/testing';
+import { Response } from 'express';
 import { SignoutUseCase } from './signout-use-case';
 import { TokenType } from '../../../../../modules/auth/domain/enums/token-type.enum';
 import type { ICookieService } from '../../../../../modules/auth/domain/services/cookie.service';
 
-describe('Signout', () => {
+describe('SignoutUseCase', () => {
   let signoutUseCase: SignoutUseCase;
   let cookieService: ICookieService;
 
@@ -22,10 +23,12 @@ describe('Signout', () => {
     cookieService = module.get('ICookieService');
   });
 
-  const res = {} as any;
+  const res = {} as Response;
 
   it('should clear auth cookies and return success message', () => {
     const result = signoutUseCase.execute(res);
+
+    expect(cookieService.clearAuthCookie).toHaveBeenCalledTimes(2);
 
     expect(cookieService.clearAuthCookie).toHaveBeenCalledWith(
       res,

@@ -1,4 +1,5 @@
 import { Test } from '@nestjs/testing';
+import { Response } from 'express';
 import { UnauthorizedException } from '@nestjs/common';
 import type { IUserRepository } from '../../../../../modules/auth/domain/repositiries/user.repository';
 import { SigninUseCase } from './signin-use-case';
@@ -56,7 +57,7 @@ describe('SigninUseCase', () => {
     updatedAt: new Date(),
   };
 
-  const res = {} as any;
+  const res = {} as Response;
 
   const tokens = {
     mockAccessToken: 'accessToken',
@@ -110,6 +111,8 @@ describe('SigninUseCase', () => {
       .mockReturnValueOnce(tokens.mockRefreshToken);
 
     await signinUseCase.execute(res, dto);
+
+    expect(cookieService.setAuthCookie).toHaveBeenCalledTimes(2);
 
     expect(cookieService.setAuthCookie).toHaveBeenCalledWith(
       res,
