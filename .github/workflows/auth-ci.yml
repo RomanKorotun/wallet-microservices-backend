@@ -106,10 +106,10 @@ jobs:
       - name: Wait for Postgres
         run: |
           for i in {1..30}; do 
-            pg_isready -h localhost -p 5432 -U ${{ secrets.POSTGRES_USER_AUTH_TEST }} && exit 0 
+            pg_isready -h localhost -p 5432 -U ${{ secrets.POSTGRES_USER_AUTH_TEST }} -d ${{ secrets.POSTGRES_DB_AUTH_TEST }} && exit 0 
             sleep 2 
           done 
-          exit
+          exit 1
 
       - name: Prepare test database
         working-directory: ./services/auth-service
