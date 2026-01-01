@@ -70,6 +70,7 @@ jobs:
       JWT_REFRESH_TOKEN_TIME: ${{ secrets.JWT_REFRESH_TOKEN_TIME }}
       REDIS_HOST_AUTH_TEST: ${{ secrets.REDIS_HOST_AUTH_TEST }}
       REDIS_PORT_AUTH_TEST: ${{ secrets.REDIS_PORT_AUTH_TEST }}
+      REDIS_PASSWORD_AUTH_TEST: ${{ secrets.REDIS_PASSWORD_AUTH_TEST }}
 
     services:
       postgres:
@@ -88,7 +89,9 @@ jobs:
         ports:
           - 6379:6379
         options: >-
-          --health-cmd="redis-cli ping"
+          # --health-cmd="redis-cli ping"
+          --requirepass ${{ secrets.REDIS_PASSWORD_AUTH_TEST }}
+          --health-cmd="redis-cli -a ${{ secrets.REDIS_PASSWORD_AUTH_TEST }} ping"
 
     steps:
       - name: Clone repository

@@ -16,7 +16,7 @@ export class RedisService extends Redis implements OnModuleDestroy {
           : Number(config.get('REDIS_PORT_AUTH')),
       password:
         config.get('NODE_ENV') === 'test'
-          ? undefined
+          ? config.get('REDIS_PASSWORD_AUTH_TEST')
           : config.get('REDIS_PASSWORD_AUTH'),
       db: 0,
     });
