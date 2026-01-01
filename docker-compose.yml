@@ -44,15 +44,7 @@ services:
     image: redis:7-alpine
     ports:
       - "6381:6379"
-    command:
-      [
-        "redis-server",
-        "--appendonly",
-        "yes",
-        "--requirepass",
-        "${REDIS_PASSWORD_AUTH_TEST}",
-      ]
-    env_file: .env
+    command: ["redis-server", "--appendonly", "yes"]
 
   postgres-auth:
     container_name: postgres-auth
