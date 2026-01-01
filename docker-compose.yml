@@ -1,7 +1,7 @@
 services:
   auth-service:
     container_name: auth-service
-    image: node:25-alpine
+    image: node:20-alpine
     build:
       context: ./services/auth-service
       dockerfile: Dockerfile.dev
@@ -14,10 +14,49 @@ services:
     depends_on:
       postgres-auth:
         condition: service_healthy
+      redis-auth:
+        condition: service_healthy
+
+  redis-auth:
+    container_name: redis-auth
+    image: redis:7-alpine
+    ports:
+      - "6380:6379"
+    command:
+      [
+        "redis-server",
+        "--appendonly",
+        "yes",
+        "--requirepass",
+        "${REDIS_PASSWORD_AUTH}",
+      ]
+    volumes:
+      - redis-data-auth:/data
+    env_file: .env
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping", "-a", "${REDIS_PASSWORD_AUTH}"]
+      interval: 5s
+      timeout: 2s
+      retries: 5
+
+  redis-test-auth:
+    container_name: redis-test-auth
+    image: redis:7-alpine
+    ports:
+      - "6381:6379"
+    command:
+      [
+        "redis-server",
+        "--appendonly",
+        "yes",
+        "--requirepass",
+        "${REDIS_PASSWORD_AUTH_TEST}",
+      ]
+    env_file: .env
 
   postgres-auth:
     container_name: postgres-auth
-    image: postgres:18-alpine
+    image: postgres:16-alpine
     ports:
       - 5433:5432
     volumes:
@@ -42,11 +81,9 @@ services:
 
   postgres-auth-test:
     container_name: postgres-auth-test
-    image: postgres:18-alpine
+    image: postgres:16-alpine
     ports:
       - 5434:5432
-    volumes:
-      - pgdata-auth-test:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: ${POSTGRES_USER_AUTH_TEST}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_AUTH_TEST}
@@ -67,7 +104,7 @@ services:
 
   postgres-wallet:
     container_name: postgres-wallet
-    image: postgres:18-alpine
+    image: postgres:16-alpine
     ports:
       - 5435:5432
     volumes:
@@ -97,13 +134,13 @@ services:
       - 5672:5672
       - 15672:15672
     volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
+      - rabbitmq-data:/var/lib/rabbitmq
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
 
 volumes:
   pgdata-auth:
-  pgdata-auth-test:
   pgdata-wallet:
-  rabbitmq_data:
+  rabbitmq-data:
+  redis-data-auth:

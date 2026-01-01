@@ -17,7 +17,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "db:test": "node -r ts-node/register ./scripts/db-test.ts",
-    "test:e2e": "yarn db:test && jest --config ./test/e2e/jest-e2e.json  --verbose"
+    "test:e2e": "yarn db:test && jest --config ./test/e2e/jest-e2e.json  --verbose --runInBand"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
@@ -34,7 +34,9 @@
     "class-validator": "^0.14.2",
     "cookie-parser": "^1.4.7",
     "cross-env": "^10.1.0",
+    "ioredis": "^5.8.2",
     "joi": "^18.0.1",
+    "nanoid": "3",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "reflect-metadata": "^0.2.2",

@@ -40,7 +40,9 @@ export class AllExceptionFilter implements ExceptionFilter {
       }
     }
 
-    this.logger.error(message, exception);
+    if (process.env.NODE_ENV === 'development') {
+      this.logger.error(message, exception);
+    }
 
     response.status(status).json({
       status,
