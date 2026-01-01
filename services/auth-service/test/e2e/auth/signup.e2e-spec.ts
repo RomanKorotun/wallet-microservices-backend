@@ -1,12 +1,13 @@
 import { ConfigService } from '@nestjs/config';
 import { Server } from 'http';
-import type { IUserRepository } from '../../../src/modules/auth/domain/repositiries/user.repository';
+import type { IUserRepository } from '../../../src/modules/auth/domain/repositories/user.repository';
 import { TokenType } from '../../../src/modules/auth/domain/enums/token-type.enum';
 import { getCookies } from './helpers/cookies.helper';
 import { getToken } from './helpers/tokens.helper';
 import type { ITokenService } from '../../../src/modules/auth/domain/services/token.service';
 import { createTestApp, ITestApp } from './helpers/test-app';
 import { postRequest } from './helpers/request.helper';
+import { ISessionRepository } from '../../../src/modules/auth/domain/repositories/session.repository';
 
 describe('AuthController e2e - signup', () => {
   let testApp: ITestApp;
@@ -14,6 +15,7 @@ describe('AuthController e2e - signup', () => {
   let userRepository: IUserRepository;
   let tokenService: ITokenService;
   let configService: ConfigService;
+  let sessionRepository: ISessionRepository;
 
   beforeAll(async () => {
     testApp = await createTestApp();
@@ -21,14 +23,17 @@ describe('AuthController e2e - signup', () => {
     userRepository = testApp.app.get('IUserRepository');
     tokenService = testApp.app.get('ITokenService');
     configService = testApp.app.get(ConfigService);
+    sessionRepository =
+      testApp.app.get<ISessionRepository>('ISessionRepository');
+  });
+
+  afterEach(async () => {
+    await sessionRepository.deleteAll();
+    await userRepository.deleteAll();
   });
 
   afterAll(async () => {
     await testApp.app.close();
-  });
-
-  afterEach(async () => {
-    await userRepository.deleteAll();
   });
 
   const signupDto = {
@@ -176,6 +181,16 @@ describe('AuthController e2e - signup', () => {
     const refreshToken = getToken(cookiesArray, TokenType.REFRESH);
     const payload = tokenService.decode(refreshToken, TokenType.REFRESH);
     expect(payload).toHaveProperty('id');
+  });
+
+  it('should create session in the session repository', async () => {
+    const response = await postRequest(server, urlSignup, signupDto);
+    const cookiesArray: string[] = getCookies(response);
+    const refreshToken = getToken(cookiesArray, TokenType.REFRESH);
+    const session = await sessionRepository.getByRefreshToken(refreshToken);
+    expect(session).not.toBeNull();
+    expect(session!.userId).toBeDefined();
+    expect(session!.createdAt).toBeGreaterThan(0);
   });
 
   it('should set accessToken and refreshToken cookies', async () => {

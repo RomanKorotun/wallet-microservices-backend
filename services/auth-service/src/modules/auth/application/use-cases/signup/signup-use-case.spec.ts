@@ -1,13 +1,19 @@
+jest.mock('nanoid', () => ({
+  nanoid: () => 'test-nanoid',
+}));
 import { Test } from '@nestjs/testing';
 import { Response } from 'express';
 import { ConflictException } from '@nestjs/common';
-import type { IUserRepository } from '../../../domain/repositiries/user.repository';
+import type { IUserRepository } from '../../../domain/repositories/user.repository';
 import { SignupUseCase } from './signup-use-case';
 import { DomainUser } from '../../../domain/entities/user';
 import { TokenType } from '../../../domain/enums/token-type.enum';
 import type { ICookieService } from '../../../../../modules/auth/domain/services/cookie.service';
 import type { IPasswordService } from '../../../../../modules/auth/domain/services/password.service';
 import type { ITokenService } from '../../../../../modules/auth/domain/services/token.service';
+import { ISessionRepository } from '../../../domain/repositories/session.repository';
+
+jest.setTimeout(30000);
 
 describe('SignupUseCase', () => {
   let signupUseCase: SignupUseCase;
@@ -15,6 +21,7 @@ describe('SignupUseCase', () => {
   let userRepository: IUserRepository;
   let tokenService: ITokenService;
   let cookieService: ICookieService;
+  let sessionRepository: ISessionRepository;
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
@@ -36,6 +43,10 @@ describe('SignupUseCase', () => {
           provide: 'ICookieService',
           useValue: { setAuthCookie: jest.fn() },
         },
+        {
+          provide: 'ISessionRepository',
+          useValue: { set: jest.fn() },
+        },
       ],
     }).compile();
 
@@ -44,6 +55,7 @@ describe('SignupUseCase', () => {
     userRepository = module.get('IUserRepository');
     tokenService = module.get('ITokenService');
     cookieService = module.get('ICookieService');
+    sessionRepository = module.get('ISessionRepository');
   });
 
   const dto = {
@@ -127,6 +139,29 @@ describe('SignupUseCase', () => {
       2,
       response.id,
       TokenType.REFRESH,
+    );
+  });
+
+  it('should save session with correct parameters', async () => {
+    jest.spyOn(userRepository, 'findByEmail').mockResolvedValue(null);
+    jest.spyOn(passwordService, 'hash').mockResolvedValue(hashedPassword);
+    jest.spyOn(userRepository, 'createUser').mockResolvedValueOnce(response);
+    jest
+      .spyOn(tokenService, 'generate')
+      .mockReturnValueOnce(tokens.mockAccessToken)
+      .mockReturnValueOnce(tokens.mockRefreshToken);
+
+    await signupUseCase.execute(res, dto);
+
+    expect(sessionRepository.set).toHaveBeenCalledTimes(1);
+
+    expect(sessionRepository.set).toHaveBeenCalledWith(
+      expect.stringMatching(/^session:/),
+      {
+        userId: response.id,
+        createdAt: expect.any(Number),
+      },
+      7 * 24 * 60 * 60,
     );
   });
 

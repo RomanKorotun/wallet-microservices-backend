@@ -1,7 +1,7 @@
 import { ConfigService } from '@nestjs/config';
 import { Server } from 'http';
 import { ITokenService } from '../../../src/modules/auth/domain/services/token.service';
-import { IUserRepository } from '../../../src/modules/auth/domain/repositiries/user.repository';
+import { IUserRepository } from '../../../src/modules/auth/domain/repositories/user.repository';
 import { createTestApp, ITestApp } from './helpers/test-app';
 import { getCookies } from './helpers/cookies.helper';
 import { getToken } from './helpers/tokens.helper';
@@ -23,12 +23,16 @@ describe('AuthController e2e - signin', () => {
     configService = testApp.app.get(ConfigService);
   });
 
-  afterAll(async () => {
-    await testApp.app.close();
+  beforeEach(async () => {
+    await postRequest(server, urlSignup, signupDto);
   });
 
   afterEach(async () => {
     await userRepository.deleteAll();
+  });
+
+  afterAll(async () => {
+    await testApp.app.close();
   });
 
   const signupDto = {
@@ -98,7 +102,6 @@ describe('AuthController e2e - signin', () => {
   });
 
   it('should return 401 if user with this email does not exist', async () => {
-    await postRequest(server, urlSignup, signupDto);
     const { statusCode } = await postRequest(
       server,
       urlSignin,
@@ -108,7 +111,6 @@ describe('AuthController e2e - signin', () => {
   });
 
   it('should return 401 if password is incorrect', async () => {
-    await postRequest(server, urlSignup, signupDto);
     const { statusCode } = await postRequest(
       server,
       urlSignin,
@@ -118,13 +120,11 @@ describe('AuthController e2e - signin', () => {
   });
 
   it('should return status 200', async () => {
-    await postRequest(server, urlSignup, signupDto);
     const { statusCode } = await postRequest(server, urlSignin, signinDto);
     expect(statusCode).toBe(200);
   });
 
   it('should return user object with correct fields', async () => {
-    await postRequest(server, urlSignup, signupDto);
     const response = await postRequest(server, urlSignin, signinDto);
     expect(response.body).toEqual({
       message: 'Access Token i Refresh Token встановлені в кукі',
@@ -137,7 +137,6 @@ describe('AuthController e2e - signin', () => {
   });
 
   it('should have valid payload in accessToken', async () => {
-    await postRequest(server, urlSignup, signupDto);
     const response = await postRequest(server, urlSignin, signinDto);
     const cookiesArray: string[] = getCookies(response);
     const accessToken = getToken(cookiesArray, TokenType.ACCESS);
@@ -146,7 +145,6 @@ describe('AuthController e2e - signin', () => {
   });
 
   it('should have valid payload in refreshToken', async () => {
-    await postRequest(server, urlSignup, signupDto);
     const response = await postRequest(server, urlSignin, signinDto);
     const cookiesArray: string[] = getCookies(response);
     const refreshToken = getToken(cookiesArray, TokenType.REFRESH);
@@ -155,7 +153,6 @@ describe('AuthController e2e - signin', () => {
   });
 
   it('should set accessToken and refreshToken cookies', async () => {
-    await postRequest(server, urlSignup, signupDto);
     const response = await postRequest(server, urlSignin, signinDto);
     const cookiesArray: string[] = getCookies(response);
     expect(cookiesArray.some((c: string) => c.startsWith('accessToken'))).toBe(
@@ -167,7 +164,6 @@ describe('AuthController e2e - signin', () => {
   });
 
   it('should set cookies with security attributes', async () => {
-    await postRequest(server, urlSignup, signupDto);
     const response = await postRequest(server, urlSignin, signinDto);
     const cookiesArray: string[] = getCookies(response);
     expect(cookiesArray.every((c) => c.includes('HttpOnly'))).toBe(true);

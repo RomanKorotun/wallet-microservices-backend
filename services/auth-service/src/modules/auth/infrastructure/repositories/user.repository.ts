@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { PrismaService } from '../../../../modules/prisma/prisma.service';
-import { IUserRepository } from '../../domain/repositiries/user.repository';
+import { IUserRepository } from '../../domain/repositories/user.repository';
 import { DomainUser } from '../../domain/entities/user';
 import { ICreateUserProps } from '../../domain/types/create-user.props';
 

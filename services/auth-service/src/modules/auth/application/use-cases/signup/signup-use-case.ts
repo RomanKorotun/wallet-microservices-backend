@@ -1,12 +1,13 @@
 import { ConflictException, Inject, Injectable } from '@nestjs/common';
 import type { Response } from 'express';
 import { SignupRequestDto } from '../../../interfaces/dto/signup/signup-request.dto';
-import type { IUserRepository } from '../../../domain/repositiries/user.repository';
+import type { IUserRepository } from '../../../domain/repositories/user.repository';
 import { TokenType } from '../../../domain/enums/token-type.enum';
 import { SignupSuccessResponseDto } from '../../../../../modules/auth/interfaces/dto/signup/signup-success-response.dto';
 import type { ICookieService } from '../../../../../modules/auth/domain/services/cookie.service';
 import type { IPasswordService } from '../../../../../modules/auth/domain/services/password.service';
 import type { ITokenService } from '../../../../../modules/auth/domain/services/token.service';
+import type { ISessionRepository } from '../../../domain/repositories/session.repository';
 
 @Injectable()
 export class SignupUseCase {
@@ -16,6 +17,8 @@ export class SignupUseCase {
     @Inject('IUserRepository') private readonly userRepository: IUserRepository,
     @Inject('ITokenService') private readonly tokenService: ITokenService,
     @Inject('ICookieService') private readonly cookieService: ICookieService,
+    @Inject('ISessionRepository')
+    private sessionRepository: ISessionRepository,
   ) {}
   async execute(
     res: Response,
@@ -46,6 +49,17 @@ export class SignupUseCase {
     const refreshToken = this.tokenService.generate(
       createdUser.id,
       TokenType.REFRESH,
+    );
+
+    const sessionKey = `session:${refreshToken}`;
+
+    await this.sessionRepository.set(
+      sessionKey,
+      {
+        userId: createdUser.id,
+        createdAt: Date.now(),
+      },
+      7 * 24 * 60 * 60,
     );
 
     this.cookieService.setAuthCookie(res, accessToken, TokenType.ACCESS);

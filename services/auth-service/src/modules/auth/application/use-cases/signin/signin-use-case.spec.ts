@@ -1,7 +1,7 @@
 import { Test } from '@nestjs/testing';
 import { Response } from 'express';
 import { UnauthorizedException } from '@nestjs/common';
-import type { IUserRepository } from '../../../../../modules/auth/domain/repositiries/user.repository';
+import type { IUserRepository } from '../../../domain/repositories/user.repository';
 import { SigninUseCase } from './signin-use-case';
 import { DomainUser } from '../../../../../modules/auth/domain/entities/user';
 import { TokenType } from '../../../../../modules/auth/domain/enums/token-type.enum';

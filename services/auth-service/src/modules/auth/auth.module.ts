@@ -11,9 +11,11 @@ import { JwtAccessStrategy } from './infrastructure/strategies/jwt-access-strate
 import { SignoutUseCase } from './application/use-cases/signout/signout-use-case';
 import { RefreshUseCase } from './application/use-cases/refresh/refresh-use-case';
 import { JwtRefreshStrategy } from './infrastructure/strategies/jwt-refresh-strategy';
+import { SessionRepository } from './infrastructure/repositories/session.repository';
+import { RedisModule } from '../redis/redis.module';
 
 @Module({
-  imports: [PrismaModule],
+  imports: [PrismaModule, RedisModule],
   controllers: [AuthController],
   providers: [
     SignupUseCase,
@@ -26,6 +28,7 @@ import { JwtRefreshStrategy } from './infrastructure/strategies/jwt-refresh-stra
     { provide: 'ITokenService', useClass: TokenService },
     { provide: 'ICookieService', useClass: CookieService },
     { provide: 'IUserRepository', useClass: UserRepository },
+    { provide: 'ISessionRepository', useClass: SessionRepository },
   ],
 })
 export class AuthModule {}

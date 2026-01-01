@@ -1,2 +1,4 @@
 import { config } from 'dotenv';
-config({ path: '.env.test' });
+if (process.env.CI !== 'true') {
+  config({ path: '.env.test', override: true });
+}
