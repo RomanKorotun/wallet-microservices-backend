@@ -105,7 +105,7 @@ jobs:
         run: |
           echo "Waiting for Postgres..."
           for i in {1..30}; do
-            pg_isready -h postgres -p 5432 -U ${{ secrets.POSTGRES_USER_AUTH_TEST }} && break
+            PGPASSWORD=${{ secrets.POSTGRES_PASSWORD_AUTH_TEST }} pg_isready -h postgres -p 5432 -U ${{ secrets.POSTGRES_USER_AUTH_TEST }} && break
             sleep 2
           done
 
