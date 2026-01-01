@@ -82,19 +82,13 @@ jobs:
           - 5432:5432
         options: >-
           --health-cmd="pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"
-          --health-interval=5s
-          --health-timeout=5s
-          --health-retries=30
 
       redis:
         image: redis:7
         ports:
           - 6379:6379
         options: >-
-          --health-cmd="redis-cli ping" 
-          --health-interval=5s 
-          --health-timeout=5s 
-          --health-retries=30
+          --health-cmd="redis-cli ping"
 
     steps:
       - name: Clone repository
@@ -108,34 +102,6 @@ jobs:
       - name: Install packages
         working-directory: ./services/auth-service
         run: yarn install
-
-      - name: Debug DATABASE_URL
-        run: echo $DATABASE_URL
-
-      - name: Wait for Postgres
-        run: |
-          for i in {1..30}; do 
-            pg_isready -h localhost -p 5432 -U ${{ secrets.POSTGRES_USER_AUTH_TEST }} -d ${{ secrets.POSTGRES_DB_AUTH_TEST }} && exit 0 
-            sleep 2 
-          done 
-          exit 1
-
-      - name: Debug Redis ENV
-        run: |
-          echo "REDIS_HOST_AUTH_TEST=$REDIS_HOST_AUTH_TEST" 
-          echo "REDIS_PORT_AUTH_TEST=$REDIS_PORT_AUTH_TEST" 
-          echo "REDIS_PASSWORD_AUTH_TEST=$REDIS_PASSWORD_AUTH_TEST"
-
-      - name: Install redis-cli
-        run: sudo apt-get update && sudo apt-get install -y redis-tools
-
-      - name: Wait for Redis
-        run: |
-          for i in {1..30}; do
-            redis-cli -h localhost -p 6379 ping && exit 0
-            sleep 2
-          done
-          exit 1
 
       - name: Prepare test database
         working-directory: ./services/auth-service
