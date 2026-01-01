@@ -74,17 +74,16 @@ jobs:
 
     services:
       postgres:
-        image: postgres:18
+        image: postgres:16
         env:
           POSTGRES_USER: ${{ secrets.POSTGRES_USER_AUTH_TEST }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD_AUTH_TEST }}
           POSTGRES_DB: ${{ secrets.POSTGRES_DB_AUTH_TEST }}
         options: >-
           --health-cmd="pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"
-          --health-interval=10s
+          --health-interval=5s
           --health-timeout=5s
-          --health-retries=5
-          --health-start-period=30s
+          --health-retries=10
 
       redis:
         image: redis:7
@@ -101,16 +100,6 @@ jobs:
       - name: Install packages
         working-directory: ./services/auth-service
         run: yarn install
-
-      - name: Wait for Postgres
-        run: |
-          echo "Waiting for Postgres..."
-          for i in {1..60}; do
-            pg_isready -h postgres -p 5432 -U $POSTGRES_USER && break
-            sleep 1
-          done
-        env:
-          POSTGRES_USER: ${{ secrets.POSTGRES_USER_AUTH_TEST }}
 
       - name: Prepare test database
         working-directory: ./services/auth-service
