@@ -78,6 +78,8 @@ jobs:
           POSTGRES_USER: ${{ secrets.POSTGRES_USER_AUTH_TEST }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD_AUTH_TEST }}
           POSTGRES_DB: ${{ secrets.POSTGRES_DB_AUTH_TEST }}
+        ports:
+          - 5432:5432
         options: >-
           --health-cmd="pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"
           --health-interval=5s
