@@ -63,9 +63,6 @@ jobs:
 
     env:
       NODE_ENV: test
-      POSTGRES_USER: ${{ secrets.POSTGRES_USER_AUTH_TEST }}
-      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD_AUTH_TEST }}
-      POSTGRES_DB: ${{ secrets.POSTGRES_DB_AUTH_TEST }}
       DATABASE_URL: postgresql://${{ secrets.POSTGRES_USER_AUTH_TEST }}:${{ secrets.POSTGRES_PASSWORD_AUTH_TEST }}@localhost:5432/${{ secrets.POSTGRES_DB_AUTH_TEST }}
       JWT_REFRESH_TOKEN_SECRET: ${{ secrets.JWT_REFRESH_TOKEN_SECRET }}
       JWT_ACCESS_TOKEN_TIME: ${{ secrets.JWT_ACCESS_TOKEN_TIME }}
@@ -78,11 +75,11 @@ jobs:
       postgres:
         image: postgres:16
         env:
-          POSTGRES_USER: ${{ env.POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
-          POSTGRES_DB: ${{ env.POSTGRES_DB }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER_AUTH_TEST }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD_AUTH_TEST }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB_AUTH_TEST }}
         options: >-
-          --health-cmd="pg_isready -U ${{ env.POSTGRES_USER }} -d ${{ env.POSTGRES_DB }}"
+          --health-cmd="pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"
           --health-interval=5s
           --health-timeout=5s
           --health-retries=10
