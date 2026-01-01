@@ -86,9 +86,9 @@ jobs:
           --health-retries=5
 
       redis:
-        image: redis:7
-        options: >-
-          --requirepass "$REDIS_PASSWORD_AUTH_TEST"
+      image: redis:7
+      env:
+        REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD_AUTH_TEST }}
 
     steps:
       - name: Clone repository
