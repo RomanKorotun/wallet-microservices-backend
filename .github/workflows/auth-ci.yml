@@ -89,6 +89,8 @@ jobs:
 
       redis:
         image: redis:7
+        ports:
+          - 6379:6379
 
     steps:
       - name: Clone repository
@@ -110,6 +112,20 @@ jobs:
         run: |
           for i in {1..30}; do 
             pg_isready -h localhost -p 5432 -U ${{ secrets.POSTGRES_USER_AUTH_TEST }} -d ${{ secrets.POSTGRES_DB_AUTH_TEST }} && exit 0 
+            sleep 2 
+          done 
+          exit 1
+
+      - name: Debug Redis ENV
+        run: |
+          echo "REDIS_HOST_AUTH_TEST=$REDIS_HOST_AUTH_TEST" 
+          echo "REDIS_PORT_AUTH_TEST=$REDIS_PORT_AUTH_TEST" 
+          echo "REDIS_PASSWORD_AUTH_TEST=$REDIS_PASSWORD_AUTH_TEST"
+
+      - name: Wait for Redis
+        run: |
+          for i in {1..30}; do 
+            redis-cli -h localhost -p 6379 ping && exit 0 
             sleep 2 
           done 
           exit 1
