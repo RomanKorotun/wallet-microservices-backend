@@ -105,7 +105,7 @@ jobs:
         run: |
           echo "Waiting for Postgres..."
           for i in {1..60}; do
-            if pg_isready -h postgres -p 5432 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -q; then
+            if PGPASSWORD=$POSTGRES_PASSWORD pg_isready -h postgres -p 5432 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -q; then
               echo "Postgres is ready!"
               break
             fi
@@ -114,6 +114,7 @@ jobs:
           done
         env:
           POSTGRES_USER: ${{ secrets.POSTGRES_USER_AUTH_TEST }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD_AUTH_TEST }}
           POSTGRES_DB: ${{ secrets.POSTGRES_DB_AUTH_TEST }}
 
       - name: Prepare test database
