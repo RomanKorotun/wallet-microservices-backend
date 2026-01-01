@@ -126,6 +126,14 @@ jobs:
           echo "REDIS_PORT_AUTH_TEST=$REDIS_PORT_AUTH_TEST" 
           echo "REDIS_PASSWORD_AUTH_TEST=$REDIS_PASSWORD_AUTH_TEST"
 
+      - name: Wait for Redis
+        run: |
+          for i in {1..30}; do
+            redis-cli -h localhost -p 6379 ping && exit 0
+            sleep 2
+          done
+          exit 1
+
       - name: Prepare test database
         working-directory: ./services/auth-service
         run: yarn db:test
