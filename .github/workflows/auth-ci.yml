@@ -88,7 +88,7 @@ jobs:
       redis:
         image: redis:7
         options: >-
-          --requirepass "${{ secrets.REDIS_PASSWORD_AUTH_TEST }}"
+          --requirepass "$REDIS_PASSWORD_AUTH_TEST"
 
     steps:
       - name: Clone repository
