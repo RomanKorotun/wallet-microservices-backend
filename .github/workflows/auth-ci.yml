@@ -105,11 +105,16 @@ jobs:
         run: |
           echo "Waiting for Postgres..."
           for i in {1..60}; do
-            pg_isready -h postgres -p 5432 -U ${{ secrets.POSTGRES_USER_AUTH_TEST }} && break
+            if pg_isready -h postgres -p 5432 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -q; then
+              echo "Postgres is ready!"
+              break
+            fi
+            echo "Postgres not ready yet..."
             sleep 1
           done
         env:
           POSTGRES_USER: ${{ secrets.POSTGRES_USER_AUTH_TEST }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB_AUTH_TEST }}
 
       - name: Prepare test database
         working-directory: ./services/auth-service
