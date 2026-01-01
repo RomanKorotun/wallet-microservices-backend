@@ -101,14 +101,6 @@ jobs:
         working-directory: ./services/auth-service
         run: yarn install
 
-      - name: Wait for Postgres
-        run: |
-          echo "Waiting for Postgres..."
-          for i in {1..30}; do
-            PGPASSWORD=${{ secrets.POSTGRES_PASSWORD_AUTH_TEST }} pg_isready -h postgres -p 5432 -U ${{ secrets.POSTGRES_USER_AUTH_TEST }} && break
-            sleep 2
-          done
-
       - name: Prepare test database
         working-directory: ./services/auth-service
         run: yarn db:test
