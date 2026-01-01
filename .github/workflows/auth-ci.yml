@@ -70,7 +70,6 @@ jobs:
       JWT_REFRESH_TOKEN_TIME: ${{ secrets.JWT_REFRESH_TOKEN_TIME }}
       REDIS_HOST_AUTH_TEST: ${{ secrets.REDIS_HOST_AUTH_TEST }}
       REDIS_PORT_AUTH_TEST: ${{ secrets.REDIS_PORT_AUTH_TEST }}
-      REDIS_PASSWORD_AUTH_TEST: ${{ secrets.REDIS_PASSWORD_AUTH_TEST }}
 
     services:
       postgres:
