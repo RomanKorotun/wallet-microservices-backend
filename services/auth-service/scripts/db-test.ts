@@ -1,7 +1,7 @@
 import { execa } from 'execa';
 import { config } from 'dotenv';
 
-config({ path: '.env.test' });
+config({ path: '.env.test', override: false });
 
 async function main() {
   await execa('npx', ['prisma', 'migrate', 'deploy'], { stdio: 'inherit' });

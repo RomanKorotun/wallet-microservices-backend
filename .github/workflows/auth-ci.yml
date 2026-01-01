@@ -63,7 +63,7 @@ jobs:
 
     env:
       NODE_ENV: test
-      DATABASE_URL: postgresql://${{ secrets.POSTGRES_USER_AUTH_TEST }}:${{ secrets.POSTGRES_PASSWORD_AUTH_TEST }}@localhost:5434/${{ secrets.POSTGRES_DB_AUTH_TEST }}?schema=public
+      DATABASE_URL: postgresql://${{ secrets.POSTGRES_USER_AUTH_TEST }}:${{ secrets.POSTGRES_PASSWORD_AUTH_TEST }}@postgres:5432/${{ secrets.POSTGRES_DB_AUTH_TEST }}?schema=public
       JWT_ACCESS_TOKEN_SECRET: ${{ secrets.JWT_ACCESS_TOKEN_SECRET }}
       JWT_REFRESH_TOKEN_SECRET: ${{ secrets.JWT_REFRESH_TOKEN_SECRET }}
       JWT_ACCESS_TOKEN_TIME: ${{ secrets.JWT_ACCESS_TOKEN_TIME }}
@@ -79,17 +79,18 @@ jobs:
           POSTGRES_USER: ${{ secrets.POSTGRES_USER_AUTH_TEST }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD_AUTH_TEST }}
           POSTGRES_DB: ${{ secrets.POSTGRES_DB_AUTH_TEST }}
-        ports:
-          - 5434:5432
         options: >-
           --health-cmd="pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
-          --health-start-period=30s
 
       redis:
         image: redis:7
+        env:
+          REDIS_PASSWORD_AUTH_TEST: ${{ secrets.REDIS_PASSWORD_AUTH_TEST }}
+        command:
+          ["redis-server", "--requirepass", "${REDIS_PASSWORD_AUTH_TEST}"]
 
     steps:
       - name: Clone repository
