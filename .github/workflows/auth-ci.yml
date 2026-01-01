@@ -84,12 +84,18 @@ jobs:
         options: >-
           --health-cmd="pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"
 
+      # redis:
+      #   image: redis:7
+      #   ports:
+      #     - 6379:6379
+      #   options: >-
+      #     --health-cmd="redis-cli ping"
+
       redis:
         image: redis:7
         ports:
           - 6379:6379
         options: >-
-          # --health-cmd="redis-cli ping"
           --requirepass ${{ secrets.REDIS_PASSWORD_AUTH_TEST }}
           --health-cmd="redis-cli -a ${{ secrets.REDIS_PASSWORD_AUTH_TEST }} ping"
 
