@@ -5,21 +5,14 @@ import Redis from 'ioredis';
 @Injectable()
 export class RedisService extends Redis implements OnModuleDestroy {
   constructor(config: ConfigService) {
-    super({
-      host:
-        config.get('NODE_ENV') === 'test'
-          ? config.get('REDIS_HOST_AUTH_TEST')
-          : config.get('REDIS_HOST_AUTH'),
-      port:
-        config.get('NODE_ENV') === 'test'
-          ? Number(config.get('REDIS_PORT_AUTH_TEST'))
-          : Number(config.get('REDIS_PORT_AUTH')),
-      password:
-        config.get('NODE_ENV') === 'test'
-          ? undefined
-          : config.get('REDIS_PASSWORD_AUTH'),
-      db: 0,
+    const url = config.getOrThrow('REDIS_URL_AUTH');
+    const useTLS = config.getOrThrow('REDIS_USE_TLS_AUTH') === 'true';
+    super(url, {
+      tls: useTLS ? { rejectUnauthorized: false } : undefined,
     });
+
+    this.on('connect', () => console.log('Redis connected'));
+    this.on('error', (err) => console.error('Redis error', err.message));
   }
 
   async onModuleDestroy() {
