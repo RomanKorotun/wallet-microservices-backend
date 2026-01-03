@@ -62,8 +62,7 @@ jobs:
     needs: unit-tests
 
     env:
-      # NODE_ENV: test
-      DATABASE_URL: postgresql://${{ secrets.POSTGRES_USER_AUTH_TEST }}:${{ secrets.POSTGRES_PASSWORD_AUTH_TEST }}@localhost:5432/${{ secrets.POSTGRES_DB_AUTH_TEST }}?schema=public
+      DATABASE_URL: postgresql://${{ secrets.POSTGRES_USER_AUTH }}:${{ secrets.POSTGRES_PASSWORD_AUTH }}@localhost:5432/${{ secrets.POSTGRES_DB_AUTH }}?schema=public
       JWT_ACCESS_TOKEN_SECRET: ${{ secrets.JWT_ACCESS_TOKEN_SECRET }}
       JWT_ACCESS_TOKEN_TIME: ${{ secrets.JWT_ACCESS_TOKEN_TIME }}
       JWT_REFRESH_TOKEN_SECRET: ${{ secrets.JWT_REFRESH_TOKEN_SECRET }}
@@ -75,9 +74,9 @@ jobs:
       postgres:
         image: postgres:16
         env:
-          POSTGRES_USER: ${{ secrets.POSTGRES_USER_AUTH_TEST }}
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD_AUTH_TEST }}
-          POSTGRES_DB: ${{ secrets.POSTGRES_DB_AUTH_TEST }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER_AUTH }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD_AUTH }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB_AUTH }}
         ports:
           - 5432:5432
         options: >-

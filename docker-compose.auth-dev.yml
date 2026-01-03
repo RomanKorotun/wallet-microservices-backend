@@ -1,0 +1,69 @@
+services:
+  auth-service:
+    container_name: auth-service
+    image: node:20-alpine
+    build:
+      context: ./services/auth-service
+      dockerfile: Dockerfile.dev
+    ports:
+      - 3000:3000
+    volumes:
+      - ./services/auth-service:/app
+      - /app/node_modules
+    depends_on:
+      postgres-auth:
+        condition: service_healthy
+      redis-auth:
+        condition: service_healthy
+
+  redis-auth:
+    container_name: redis-auth
+    image: redis:7-alpine
+    ports:
+      - "6380:6379"
+    command:
+      [
+        "redis-server",
+        "--appendonly",
+        "yes",
+        "--requirepass",
+        "${REDIS_PASSWORD_AUTH}",
+      ]
+    volumes:
+      - redis-data-auth:/data
+    env_file: .env
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping", "-a", "${REDIS_PASSWORD_AUTH}"]
+      interval: 5s
+      timeout: 2s
+      retries: 5
+
+  postgres-auth:
+    container_name: postgres-auth
+    image: postgres:16-alpine
+    ports:
+      - 5433:5432
+    volumes:
+      - pgdata-auth:/var/lib/postgresql/data
+    env_file: .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER_AUTH}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_AUTH}
+      POSTGRES_DB: ${POSTGRES_DB_AUTH}
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "pg_isready",
+          "-U",
+          "${POSTGRES_USER_AUTH}",
+          "-d",
+          "${POSTGRES_DB_AUTH}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata-auth:
+  redis-data-auth:
