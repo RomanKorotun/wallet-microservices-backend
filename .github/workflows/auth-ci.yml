@@ -81,10 +81,10 @@ jobs:
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD_AUTH }}
           POSTGRES_DB: ${{ secrets.POSTGRES_DB_AUTH }}
         options: >-
-          --health-cmd="pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
+          --health-cmd="pg_isready -U postgres" 
+          --health-interval=10s 
+          --health-timeout=5s 
+          --health-retries=5 
           --health-start-period=30s
 
       redis:
@@ -110,9 +110,9 @@ jobs:
 
       - name: Wait for Postgres
         run: |
-          until pg_isready -h postgres -p 5432 -U ${{ secrets.POSTGRES_USER_AUTH }}; do 
-            echo "Waiting for Postgres..." 
-            sleep 20 
+          until pg_isready -h postgres -p 5432; do 
+            echo "Waiting for Postgres..."
+            sleep 5 
           done
 
       - name: Prepare test database
