@@ -110,7 +110,7 @@ jobs:
         run: |
           until pg_isready -h postgres -p 5432 -U ${{ secrets.POSTGRES_USER_AUTH }}; do 
             echo "Waiting for Postgres..." 
-            sleep 10 
+            sleep 15 
           done
 
       - name: Prepare test database
