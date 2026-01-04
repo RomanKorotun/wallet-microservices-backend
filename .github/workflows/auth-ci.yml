@@ -62,6 +62,7 @@ jobs:
     needs: unit-tests
 
     env:
+      NODE_ENV: test
       DATABASE_URL: postgresql://${{ secrets.POSTGRES_USER_AUTH }}:${{ secrets.POSTGRES_PASSWORD_AUTH }}@localhost:5432/${{ secrets.POSTGRES_DB_AUTH }}?schema=public
       JWT_ACCESS_TOKEN_SECRET: ${{ secrets.JWT_ACCESS_TOKEN_SECRET }}
       JWT_ACCESS_TOKEN_TIME: ${{ secrets.JWT_ACCESS_TOKEN_TIME }}
@@ -77,8 +78,6 @@ jobs:
           POSTGRES_USER: ${{ secrets.POSTGRES_USER_AUTH }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD_AUTH }}
           POSTGRES_DB: ${{ secrets.POSTGRES_DB_AUTH }}
-        ports:
-          - 5432:5432
         options: >-
           --health-cmd="pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"
 
