@@ -13,8 +13,6 @@ import type { IPasswordService } from '../../../../../modules/auth/domain/servic
 import type { ITokenService } from '../../../../../modules/auth/domain/services/token.service';
 import { ISessionRepository } from '../../../domain/repositories/session.repository';
 
-jest.setTimeout(30000);
-
 describe('SignupUseCase', () => {
   let signupUseCase: SignupUseCase;
   let passwordService: IPasswordService;

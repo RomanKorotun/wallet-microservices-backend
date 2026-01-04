@@ -3,5 +3,8 @@ dist/
 .git/
 .vscode/
 .idea/
+.env
+.env.test
 Docerfile
 Dockerfile.dev
+Dockerfile.test
