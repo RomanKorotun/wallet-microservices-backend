@@ -83,7 +83,7 @@ jobs:
       redis:
         image: redis:7
         options: >-
-          --save "" --appendonly no --health-cmd="redis-cli ping"
+          --health-cmd="redis-cli ping"
 
     steps:
       - name: Clone repository
