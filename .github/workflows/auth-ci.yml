@@ -80,11 +80,15 @@ jobs:
           POSTGRES_USER: ${{ secrets.POSTGRES_USER_AUTH }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD_AUTH }}
           POSTGRES_DB: ${{ secrets.POSTGRES_DB_AUTH }}
+        ports:
+          - 5432:5432
         options: >-
           --health-cmd="pg_isready -U postgres"
 
       redis:
         image: redis:7
+        ports:
+          - 6379:6379
         options: >-
           --health-cmd="redis-cli ping"
 
