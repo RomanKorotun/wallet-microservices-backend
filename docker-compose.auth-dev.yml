@@ -10,6 +10,8 @@ services:
     volumes:
       - ./services/auth-service:/app
       - /app/node_modules
+    env_file:
+      - ./services/auth-service/.env
     depends_on:
       postgres-auth:
         condition: service_healthy

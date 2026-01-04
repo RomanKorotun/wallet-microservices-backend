@@ -5,8 +5,8 @@ services:
     build:
       context: ./services/auth-service
       dockerfile: Dockerfile.test
-    ports:
-      - 3000:3000
+    env_file:
+      - ./services/auth-service/.env.test
     depends_on:
       postgres-auth-test:
         condition: service_healthy
@@ -16,9 +16,7 @@ services:
   redis-auth-test:
     container_name: redis-auth-test
     image: redis:7-alpine
-    ports:
-      - "6381:6379"
-    command: ["redis-server", "--appendonly", "yes"]
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -28,8 +26,6 @@ services:
   postgres-auth-test:
     container_name: postgres-auth-test
     image: postgres:16-alpine
-    ports:
-      - 5434:5432
     env_file: .env
     environment:
       POSTGRES_USER: ${POSTGRES_USER_AUTH_TEST}

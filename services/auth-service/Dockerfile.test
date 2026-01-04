@@ -10,7 +10,7 @@ COPY . ./
 
 ENV NODE_ENV=test
 
-CMD sh -c "echo 'Auth service test container is up! Waiting for you to run tests...' && tail -f /dev/null"
+CMD ["sh","-c","yarn test && yarn test:e2e"]
 
 
 
