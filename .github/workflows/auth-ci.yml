@@ -63,7 +63,7 @@ jobs:
 
     env:
       NODE_ENV: test
-      DATABASE_URL: postgresql://${{ secrets.POSTGRES_USER_AUTH }}:${{ secrets.POSTGRES_PASSWORD_AUTH }}@localhost:5432/${{ secrets.POSTGRES_DB_AUTH }}?schema=public
+      DATABASE_URL: postgresql://${{ secrets.POSTGRES_USER_AUTH }}:${{ secrets.POSTGRES_PASSWORD_AUTH }}@postgres:5432/${{ secrets.POSTGRES_DB_AUTH }}?schema=public
       JWT_ACCESS_TOKEN_SECRET: ${{ secrets.JWT_ACCESS_TOKEN_SECRET }}
       JWT_ACCESS_TOKEN_TIME: ${{ secrets.JWT_ACCESS_TOKEN_TIME }}
       JWT_REFRESH_TOKEN_SECRET: ${{ secrets.JWT_REFRESH_TOKEN_SECRET }}
@@ -78,17 +78,20 @@ jobs:
           POSTGRES_USER: ${{ secrets.POSTGRES_USER_AUTH }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD_AUTH }}
           POSTGRES_DB: ${{ secrets.POSTGRES_DB_AUTH }}
-        ports:
-          - 5432:5432
         options: >-
           --health-cmd="pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+          --health-start-period=30s
 
       redis:
         image: redis:7
-        ports:
-          - 6379:6379
         options: >-
           --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
     steps:
       - name: Clone repository
@@ -102,6 +105,13 @@ jobs:
       - name: Install packages
         working-directory: ./services/auth-service
         run: yarn install
+
+      - name: Wait for Postgres
+        run: |
+          until pg_isready -h postgres -p 5432 -U ${{ secrets.POSTGRES_USER_AUTH }}; do 
+            echo "Waiting for Postgres..." 
+            sleep 5 
+          done
 
       - name: Prepare test database
         working-directory: ./services/auth-service
