@@ -6,11 +6,13 @@ on:
       - main
     paths:
       - services/auth-service/**
+      - .github/workflows/**
   push:
     branches:
       - main
     paths:
       - services/auth-service/**
+      - .github/workflows/**
 
 jobs:
   lint:
@@ -81,7 +83,7 @@ jobs:
         ports:
           - 5432:5432
         options: >-
-          --health-cmd="pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"
+          --health-cmd="pg_isready -U postgres"
 
       redis:
         image: redis:7
