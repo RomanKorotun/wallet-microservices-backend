@@ -1,0 +1,18 @@
+{
+  "name": "Auth Service Dev Container",
+  "dockerComposeFile": ["../../../infrastructure/docker-compose.infra-core.yml","../docker-compose.auth-dev.yml"],
+  "service": "auth-service",
+  "workspaceFolder": "/app",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "ms-azuretools.vscode-docker"
+      ],
+      "settings": {
+        "dev.containers.stopContainersWhenClosing": true
+      }
+    }
+  }
+}

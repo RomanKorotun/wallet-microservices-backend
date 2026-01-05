@@ -6,13 +6,13 @@ on:
       - main
     paths:
       - services/auth-service/**
-      - .github/workflows/**
+      - .github/workflows/auth-ci.yml
   push:
     branches:
       - main
     paths:
       - services/auth-service/**
-      - .github/workflows/**
+      - .github/workflows/auth-ci.yml
 
 jobs:
   lint:

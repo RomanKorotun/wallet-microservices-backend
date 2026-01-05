@@ -36,6 +36,10 @@ describe('SigninUseCase', () => {
           provide: 'ICookieService',
           useValue: { setAuthCookie: jest.fn() },
         },
+        {
+          provide: 'ISessionRepository',
+          useValue: { set: jest.fn() },
+        },
       ],
     }).compile();
 

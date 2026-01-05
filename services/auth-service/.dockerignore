@@ -5,6 +5,6 @@ dist/
 .idea/
 .env
 .env.test
-Docerfile
+Dockerfile
 Dockerfile.dev
 Dockerfile.test
