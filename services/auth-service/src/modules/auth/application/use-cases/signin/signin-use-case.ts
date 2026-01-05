@@ -7,6 +7,7 @@ import { SigninSuccessResponseDto } from '../../../../../modules/auth/interfaces
 import type { ICookieService } from '../../../../../modules/auth/domain/services/cookie.service';
 import type { IPasswordService } from '../../../../../modules/auth/domain/services/password.service';
 import type { ITokenService } from '../../../../../modules/auth/domain/services/token.service';
+import type { ISessionRepository } from '../../../../../modules/auth/domain/repositories/session.repository';
 
 @Injectable()
 export class SigninUseCase {
@@ -15,8 +16,9 @@ export class SigninUseCase {
     private readonly passwordService: IPasswordService,
     @Inject('IUserRepository') private readonly userRepository: IUserRepository,
     @Inject('ITokenService') private readonly tokenService: ITokenService,
-    @Inject('ICookieService')
-    private readonly cookieService: ICookieService,
+    @Inject('ICookieService') private readonly cookieService: ICookieService,
+    @Inject('ISessionRepository')
+    private readonly sessionRepository: ISessionRepository,
   ) {}
   async execute(
     res: Response,
@@ -42,6 +44,17 @@ export class SigninUseCase {
     const accessToken = this.tokenService.generate(user.id, TokenType.ACCESS);
 
     const refreshToken = this.tokenService.generate(user.id, TokenType.REFRESH);
+
+    const sessionKey = `session:${refreshToken}`;
+
+    await this.sessionRepository.set(
+      sessionKey,
+      {
+        userId: user.id,
+        createdAt: Date.now(),
+      },
+      7 * 24 * 60 * 60,
+    );
 
     this.cookieService.setAuthCookie(res, accessToken, TokenType.ACCESS);
 

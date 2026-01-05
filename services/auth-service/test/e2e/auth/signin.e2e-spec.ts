@@ -7,6 +7,7 @@ import { getCookies } from './helpers/cookies.helper';
 import { getToken } from './helpers/tokens.helper';
 import { TokenType } from '../../../src/modules/auth/domain/enums/token-type.enum';
 import { postRequest } from './helpers/request.helper';
+import { ISessionRepository } from '../../../src/modules/auth/domain/repositories/session.repository';
 
 describe('AuthController e2e - signin', () => {
   let testApp: ITestApp;
@@ -14,13 +15,16 @@ describe('AuthController e2e - signin', () => {
   let userRepository: IUserRepository;
   let tokenService: ITokenService;
   let configService: ConfigService;
+  let sessionRepository: ISessionRepository;
 
   beforeAll(async () => {
     testApp = await createTestApp();
     server = testApp.server;
-    userRepository = testApp.app.get('IUserRepository');
-    tokenService = testApp.app.get('ITokenService');
+    userRepository = testApp.app.get<IUserRepository>('IUserRepository');
+    tokenService = testApp.app.get<ITokenService>('ITokenService');
     configService = testApp.app.get(ConfigService);
+    sessionRepository =
+      testApp.app.get<ISessionRepository>('ISessionRepository');
   });
 
   beforeEach(async () => {
@@ -28,6 +32,7 @@ describe('AuthController e2e - signin', () => {
   });
 
   afterEach(async () => {
+    await sessionRepository.deleteAll();
     await userRepository.deleteAll();
   });
 

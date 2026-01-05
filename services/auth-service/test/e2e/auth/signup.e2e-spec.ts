@@ -20,8 +20,8 @@ describe('AuthController e2e - signup', () => {
   beforeAll(async () => {
     testApp = await createTestApp();
     server = testApp.server;
-    userRepository = testApp.app.get('IUserRepository');
-    tokenService = testApp.app.get('ITokenService');
+    userRepository = testApp.app.get<IUserRepository>('IUserRepository');
+    tokenService = testApp.app.get<ITokenService>('ITokenService');
     configService = testApp.app.get(ConfigService);
     sessionRepository =
       testApp.app.get<ISessionRepository>('ISessionRepository');
