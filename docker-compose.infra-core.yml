@@ -67,4 +67,4 @@ volumes:
 
 networks:
   dev-net:
-    driver: bridge
+    name: dev-net
