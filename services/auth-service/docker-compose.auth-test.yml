@@ -1,0 +1,21 @@
+services:
+  auth-service-test:
+    container_name: auth-service-test
+    image: node:20-alpine
+    build:
+      context: ./services/auth-service
+      dockerfile: Dockerfile.test
+    env_file:
+      - ./services/auth-service/.env.test
+    networks:
+      - dev-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis-test:
+        condition: service_healthy
+    
+
+
+
+

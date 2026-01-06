@@ -2,25 +2,37 @@ services:
   auth-service:
     container_name: auth-service
     build:
-      context: ../services/auth-service
+      context: ./services/auth-service
       dockerfile: Dockerfile.dev
+    image: auth-service:dev
     ports:
-      - 3000:3000
+      - "3000:3000"
     volumes:
-      - ./../services/auth-service:/app 
+      - ./services/auth-service:/app
       - auth-service-node-modules:/app/node_modules
     env_file:
-      - ../services/auth-service/.env
-    depends_on:
-      - postgres
-      - redis-dev
-      - rabbitmq
+      - ./services/auth-service/.env
     networks:
       - dev-net
+    depends_on: 
+      postgres: 
+        condition: service_healthy 
+      redis-dev: 
+        condition: service_healthy 
+      rabbitmq: 
+        condition: service_started
 
 volumes:
   auth-service-node-modules:
 
-networks:
-  dev-net:
-    driver: bridge
+
+
+
+
+
+
+
+
+
+
+
