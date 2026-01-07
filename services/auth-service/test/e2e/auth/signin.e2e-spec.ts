@@ -157,6 +157,16 @@ describe('AuthController e2e - signin', () => {
     expect(payload).toHaveProperty('id');
   });
 
+  it('should create session in the session repository', async () => {
+    const response = await postRequest(server, urlSignin, signinDto);
+    const cookiesArray: string[] = getCookies(response);
+    const refreshToken = getToken(cookiesArray, TokenType.REFRESH);
+    const session = await sessionRepository.getByRefreshToken(refreshToken);
+    expect(session).not.toBeNull();
+    expect(session!.userId).toBeDefined();
+    expect(session!.createdAt).toBeGreaterThan(0);
+  });
+
   it('should set accessToken and refreshToken cookies', async () => {
     const response = await postRequest(server, urlSignin, signinDto);
     const cookiesArray: string[] = getCookies(response);
