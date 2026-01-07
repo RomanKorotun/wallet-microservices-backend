@@ -155,10 +155,7 @@ describe('SignupUseCase', () => {
 
     expect(sessionRepository.set).toHaveBeenCalledWith(
       expect.stringMatching(/^session:/),
-      {
-        userId: response.id,
-        createdAt: expect.any(Number),
-      },
+      { userId: response.id, createdAt: expect.any(Number) },
       7 * 24 * 60 * 60,
     );
   });

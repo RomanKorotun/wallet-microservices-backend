@@ -8,6 +8,7 @@ import { TokenType } from '../../../../../modules/auth/domain/enums/token-type.e
 import type { ICookieService } from '../../../../../modules/auth/domain/services/cookie.service';
 import type { IPasswordService } from '../../../../../modules/auth/domain/services/password.service';
 import type { ITokenService } from '../../../../../modules/auth/domain/services/token.service';
+import { ISessionRepository } from '../../../../../modules/auth/domain/repositories/session.repository';
 
 describe('SigninUseCase', () => {
   let signinUseCase: SigninUseCase;
@@ -15,6 +16,7 @@ describe('SigninUseCase', () => {
   let userRepository: IUserRepository;
   let tokenService: ITokenService;
   let cookieService: ICookieService;
+  let sessionRepository: ISessionRepository;
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
@@ -48,6 +50,7 @@ describe('SigninUseCase', () => {
     userRepository = module.get('IUserRepository');
     tokenService = module.get('ITokenService');
     cookieService = module.get('ICookieService');
+    sessionRepository = module.get('ISessionRepository');
   });
 
   const dto = { email: 'test@gmail.com', password: 'R123456' };
@@ -103,6 +106,23 @@ describe('SigninUseCase', () => {
       2,
       response.id,
       TokenType.REFRESH,
+    );
+  });
+
+  it('should save session with correct parameters', async () => {
+    jest.spyOn(userRepository, 'findByEmail').mockResolvedValue(response);
+    jest.spyOn(passwordService, 'compare').mockResolvedValue(true);
+    jest
+      .spyOn(tokenService, 'generate')
+      .mockReturnValueOnce(tokens.mockAccessToken)
+      .mockReturnValueOnce(tokens.mockRefreshToken);
+
+    await signinUseCase.execute(res, dto);
+
+    expect(sessionRepository.set).toHaveBeenCalledWith(
+      expect.stringMatching(/^session:/),
+      { userId: response.id, createdAt: expect.any(Number) },
+      7 * 24 * 60 * 60,
     );
   });
 
