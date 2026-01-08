@@ -21,6 +21,10 @@ export class SessionRepository implements ISessionRepository {
     return data ? JSON.parse(data) : null;
   }
 
+  async deleteByRefreshToken(refreshToken: string): Promise<void> {
+    await this.redis.del(`session:${refreshToken}`);
+  }
+
   async deleteSession(key: string): Promise<void> {
     await this.redis.del(key);
   }

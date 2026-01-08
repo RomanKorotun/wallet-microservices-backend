@@ -5,6 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   Post,
+  Req,
   Res,
   UseGuards,
 } from '@nestjs/common';
@@ -70,11 +71,12 @@ export class AuthController {
   @UseGuards(AuthGuard('jwt-refresh'))
   @HttpCode(HttpStatus.OK)
   @Post('refresh')
-  refresh(
+  async refresh(
+    @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
     @CurrentUser() user: DomainUser,
-  ): RefreshSuccessResponseDto {
-    return this.refreshUseCase.execute(res, user.id);
+  ): Promise<RefreshSuccessResponseDto> {
+    return await this.refreshUseCase.execute(req, res, user.id);
   }
 
   @SignoutSwagger()
