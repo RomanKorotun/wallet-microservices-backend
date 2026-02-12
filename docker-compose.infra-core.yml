@@ -51,6 +51,8 @@ services:
   redis-test:
     container_name: redis-test
     image: redis:7-alpine
+    ports:
+      - "6381:6379"
     command: ["redis-server", "--appendonly", "yes"]
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]

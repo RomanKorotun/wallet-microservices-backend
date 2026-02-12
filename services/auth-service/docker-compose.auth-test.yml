@@ -14,8 +14,3 @@ services:
         condition: service_healthy
       redis-test:
         condition: service_healthy
-    
-
-
-
-

@@ -23,18 +23,11 @@ jobs:
       - name: Clone repository
         uses: actions/checkout@v3
 
-      - name: Install Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 22
+      - name: Build lint image
+        run: docker build --target lint -t auth-service:lint ./services/auth-service
 
-      - name: Install packages
-        working-directory: ./services/auth-service
-        run: yarn install
-
-      - name: Run lint
-        working-directory: ./services/auth-service
-        run: yarn lint
+      - name: Run lint in container
+        run: docker run --rm auth-service:lint
 
   unit-tests:
     name: Run Unit Tests
@@ -45,33 +38,16 @@ jobs:
       - name: Clone repository
         uses: actions/checkout@v3
 
-      - name: Install Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 22
+      - name: Build unit test image
+        run: docker build --target unit -t auth-service:unit ./services/auth-service
 
-      - name: Install packages
-        working-directory: ./services/auth-service
-        run: yarn install
-
-      - name: Run unit tests
-        working-directory: ./services/auth-service
-        run: yarn test
+      - name: Run unit test in container
+        run: docker run --rm auth-service:unit
 
   e2e-tests:
     name: Run E2E Tests
     runs-on: ubuntu-latest
     needs: unit-tests
-
-    env:
-      NODE_ENV: test
-      DATABASE_URL: postgresql://${{ secrets.POSTGRES_USER_AUTH }}:${{ secrets.POSTGRES_PASSWORD_AUTH }}@localhost:5432/${{ secrets.POSTGRES_DB_AUTH }}?schema=public
-      JWT_ACCESS_TOKEN_SECRET: ${{ secrets.JWT_ACCESS_TOKEN_SECRET }}
-      JWT_ACCESS_TOKEN_TIME: ${{ secrets.JWT_ACCESS_TOKEN_TIME }}
-      JWT_REFRESH_TOKEN_SECRET: ${{ secrets.JWT_REFRESH_TOKEN_SECRET }}
-      JWT_REFRESH_TOKEN_TIME: ${{ secrets.JWT_REFRESH_TOKEN_TIME }}
-      REDIS_USE_TLS_AUTH: ${{ secrets.REDIS_USE_TLS_AUTH }}
-      REDIS_URL_AUTH: ${{ secrets.REDIS_URL_AUTH }}
 
     services:
       postgres:
@@ -96,22 +72,20 @@ jobs:
       - name: Clone repository
         uses: actions/checkout@v3
 
-      - name: Install Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 22
+      - name: Build E2E test image
+        run: docker build --target e2e -t auth-service:e2e ./services/auth-service
 
-      - name: Install packages
-        working-directory: ./services/auth-service
-        run: yarn install
-
-      - name: Prepare test database
-        working-directory: ./services/auth-service
-        run: yarn db:test
-
-      - name: Run E2E tests
-        working-directory: ./services/auth-service
-        run: yarn test:e2e
+      - name: Run E@E test in container
+        run: |
+          docker run --rm --network host \
+            -e DATABASE_URL=postgresql://${{ secrets.POSTGRES_USER_AUTH }}:${{ secrets.POSTGRES_PASSWORD_AUTH }}@localhost:5432/${{ secrets.POSTGRES_DB_AUTH }}?schema=public \
+            -e JWT_ACCESS_TOKEN_SECRET=${{ secrets.JWT_ACCESS_TOKEN_SECRET }} \
+            -e JWT_ACCESS_TOKEN_TIME=${{ secrets.JWT_ACCESS_TOKEN_TIME }} \
+            -e JWT_REFRESH_TOKEN_SECRET=${{ secrets.JWT_REFRESH_TOKEN_SECRET }} \
+            -e JWT_REFRESH_TOKEN_TIME=${{ secrets.JWT_REFRESH_TOKEN_TIME }} \
+            -e REDIS_USE_TLS_AUTH=${{ secrets.REDIS_USE_TLS_AUTH }} \
+            -e REDIS_URL_AUTH=${{ secrets.REDIS_URL_AUTH }} \
+            auth-service:e2e
 
   build:
     name: Build Check
@@ -122,22 +96,8 @@ jobs:
       - name: Clone repository
         uses: actions/checkout@v3
 
-      - name: Install Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 22
-
-      - name: Install packages
-        working-directory: ./services/auth-service
-        run: yarn install
-
-      - name: Generate Prisma Client
-        working-directory: ./services/auth-service
-        run: npx prisma generate
-
-      - name: Build project
-        working-directory: ./services/auth-service
-        run: yarn build
+      - name: Build project image
+        run: docker build --target build -t auth-service:build ./services/auth-service
 
   docker:
     name: Docker Image
@@ -154,5 +114,6 @@ jobs:
 
       - name: Build & Push
         run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/auth-service:latest ./services/auth-service
+          docker build -target production \
+          -t ${{ secrets.DOCKERHUB_USERNAME }}/auth-service:latest ./services/auth-service
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/auth-service:latest
