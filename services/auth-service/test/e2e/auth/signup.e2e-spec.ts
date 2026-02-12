@@ -6,7 +6,7 @@ import { getCookies } from './helpers/cookies.helper';
 import { getToken } from './helpers/tokens.helper';
 import type { ITokenService } from '../../../src/modules/auth/domain/services/token.service';
 import { createTestApp, ITestApp } from './helpers/test-app';
-import { postRequest } from './helpers/request.helper';
+import { signupRequest } from './helpers/request.helper';
 import { ISessionRepository } from '../../../src/modules/auth/domain/repositories/session.repository';
 
 describe('AuthController e2e - signup', () => {
@@ -59,104 +59,76 @@ describe('AuthController e2e - signup', () => {
     invalid: { ...signupDto, password: '123' },
   };
 
-  const urlSignup = '/api/auth/signup';
-
   it('should return 400 if body is empty', async () => {
-    const { statusCode } = await postRequest(server, urlSignup, {});
+    const { statusCode } = await signupRequest(server, {});
     expect(statusCode).toBe(400);
   });
 
   it('should return 400 if username is missing', async () => {
-    const { statusCode } = await postRequest(
-      server,
-      urlSignup,
-      invalidUsername.missing,
-    );
+    const { statusCode } = await signupRequest(server, invalidUsername.missing);
     expect(statusCode).toBe(400);
   });
 
   it('should return 400 if username is not a string', async () => {
-    const { statusCode } = await postRequest(
+    const { statusCode } = await signupRequest(
       server,
-      urlSignup,
       invalidUsername.notString,
     );
     expect(statusCode).toBe(400);
   });
 
   it('should return 400 if username is short', async () => {
-    const { statusCode } = await postRequest(
+    const { statusCode } = await signupRequest(
       server,
-      urlSignup,
       invalidUsername.tooShort,
     );
     expect(statusCode).toBe(400);
   });
 
   it('should return 400 if username is long', async () => {
-    const { statusCode } = await postRequest(
-      server,
-      urlSignup,
-      invalidUsername.tooLong,
-    );
+    const { statusCode } = await signupRequest(server, invalidUsername.tooLong);
     expect(statusCode).toBe(400);
   });
 
   it('should return 400 if email is missing', async () => {
-    const { statusCode } = await postRequest(
-      server,
-      urlSignup,
-      invalidEmail.missing,
-    );
+    const { statusCode } = await signupRequest(server, invalidEmail.missing);
     expect(statusCode).toBe(400);
   });
 
   it('should return 400 if email is invalid', async () => {
-    const { statusCode } = await postRequest(
-      server,
-      urlSignup,
-      invalidEmail.invalid,
-    );
+    const { statusCode } = await signupRequest(server, invalidEmail.invalid);
     expect(statusCode).toBe(400);
   });
 
   it('should return 400 if password is missing', async () => {
-    const { statusCode } = await postRequest(
-      server,
-      urlSignup,
-      invalidPassword.missing,
-    );
+    const { statusCode } = await signupRequest(server, invalidPassword.missing);
     expect(statusCode).toBe(400);
   });
 
   it('should return 400 if password is invalid', async () => {
-    const { statusCode } = await postRequest(
-      server,
-      urlSignup,
-      invalidPassword.invalid,
-    );
+    const { statusCode } = await signupRequest(server, invalidPassword.invalid);
     expect(statusCode).toBe(400);
   });
 
   it('should return 409 if user with same email exists', async () => {
-    await postRequest(server, urlSignup, signupDto);
-    const { statusCode } = await postRequest(server, urlSignup, signupDto);
+    await signupRequest(server, signupDto);
+    const { statusCode } = await signupRequest(server, signupDto);
     expect(statusCode).toBe(409);
   });
 
   it('should create user in database', async () => {
-    await postRequest(server, urlSignup, signupDto);
+    await signupRequest(server, signupDto);
     const user = await userRepository.findByEmail(signupDto.email);
     expect(user).toBeTruthy();
   });
 
   it('should return status 201', async () => {
-    const { statusCode } = await postRequest(server, urlSignup, signupDto);
+    const { statusCode } = await signupRequest(server, signupDto);
     expect(statusCode).toBe(201);
   });
 
   it('should return user object with correct fields', async () => {
-    const response = await postRequest(server, urlSignup, signupDto);
+    const response = await signupRequest(server, signupDto);
     expect(response.body).toEqual({
       message: 'Access Token i Refresh Token встановлені в кукі',
       user: {
@@ -168,52 +140,54 @@ describe('AuthController e2e - signup', () => {
   });
 
   it('should have valid payload in accessToken', async () => {
-    const response = await postRequest(server, urlSignup, signupDto);
-    const cookiesArray: string[] = getCookies(response);
-    const accessToken = getToken(cookiesArray, TokenType.ACCESS);
+    const response = await signupRequest(server, signupDto);
+    const cookies = getCookies(response);
+    const accessToken = getToken(cookies, TokenType.ACCESS);
     const payload = tokenService.decode(accessToken, TokenType.ACCESS);
     expect(payload).toHaveProperty('id');
   });
 
   it('should have valid payload in refreshToken', async () => {
-    const response = await postRequest(server, urlSignup, signupDto);
-    const cookiesArray: string[] = getCookies(response);
-    const refreshToken = getToken(cookiesArray, TokenType.REFRESH);
+    const response = await signupRequest(server, signupDto);
+    const cookies = getCookies(response);
+    const refreshToken = getToken(cookies, TokenType.REFRESH);
     const payload = tokenService.decode(refreshToken, TokenType.REFRESH);
     expect(payload).toHaveProperty('id');
   });
 
   it('should create session in the session repository', async () => {
-    const response = await postRequest(server, urlSignup, signupDto);
-    const cookiesArray: string[] = getCookies(response);
-    const refreshToken = getToken(cookiesArray, TokenType.REFRESH);
-    const session = await sessionRepository.getByRefreshToken(refreshToken);
+    const response = await signupRequest(server, signupDto);
+    const cookies = getCookies(response);
+    const refreshToken = getToken(cookies, TokenType.REFRESH);
+    const payload = tokenService.decode(refreshToken, TokenType.REFRESH);
+    const sessionKey = `session:${payload.id}:${refreshToken}`;
+    const session = await sessionRepository.getSession(sessionKey);
     expect(session).not.toBeNull();
     expect(session!.userId).toBeDefined();
     expect(session!.createdAt).toBeGreaterThan(0);
   });
 
-  it('should set accessToken and refreshToken cookies', async () => {
-    const response = await postRequest(server, urlSignup, signupDto);
-    const cookiesArray: string[] = getCookies(response);
-    expect(cookiesArray.some((c: string) => c.startsWith('accessToken'))).toBe(
+  it('should set accessToken and refreshToken in cookies', async () => {
+    const response = await signupRequest(server, signupDto);
+    const cookies = getCookies(response);
+    expect(cookies.some((c: string) => c.startsWith('accessToken='))).toBe(
       true,
     );
-    expect(cookiesArray.some((c: string) => c.startsWith('refreshToken'))).toBe(
+    expect(cookies.some((c: string) => c.startsWith('refreshToken='))).toBe(
       true,
     );
   });
 
   it('should set cookies with security attributes', async () => {
-    const response = await postRequest(server, urlSignup, signupDto);
-    const cookiesArray: string[] = getCookies(response);
-    expect(cookiesArray.every((c) => c.includes('HttpOnly'))).toBe(true);
+    const response = await signupRequest(server, signupDto);
+    const cookies = getCookies(response);
+    expect(cookies.every((c) => c.includes('HttpOnly'))).toBe(true);
     if (configService.getOrThrow('NODE_ENV') === 'production') {
-      expect(cookiesArray.every((c) => c.includes('Secure'))).toBe(true);
-      expect(cookiesArray.every((c) => c.includes('SameSite=None'))).toBe(true);
+      expect(cookies.every((c) => c.includes('Secure'))).toBe(true);
+      expect(cookies.every((c) => c.includes('SameSite=None'))).toBe(true);
     } else {
-      expect(cookiesArray.every((c) => !c.includes('Secure'))).toBe(true);
-      expect(cookiesArray.every((c) => c.includes('SameSite=Lax'))).toBe(true);
+      expect(cookies.every((c) => !c.includes('Secure'))).toBe(true);
+      expect(cookies.every((c) => c.includes('SameSite=Lax'))).toBe(true);
     }
   });
 });

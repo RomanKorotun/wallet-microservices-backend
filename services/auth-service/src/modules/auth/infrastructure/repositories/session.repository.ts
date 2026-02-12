@@ -16,22 +16,62 @@ export class SessionRepository implements ISessionRepository {
     await this.redis.set(key, data, 'EX', ttlSeconds);
   }
 
-  async getByRefreshToken(refreshToken: string): Promise<DomainSession | null> {
-    const data = await this.redis.get(`session:${refreshToken}`);
+  async getSession(sessionKey: string): Promise<DomainSession | null> {
+    const data = await this.redis.get(sessionKey);
     return data ? JSON.parse(data) : null;
   }
 
-  async deleteByRefreshToken(refreshToken: string): Promise<void> {
-    await this.redis.del(`session:${refreshToken}`);
-  }
-
-  async deleteSession(key: string): Promise<void> {
-    await this.redis.del(key);
+  async deleteSession(sessionKey: string): Promise<void> {
+    await this.redis.del(sessionKey);
   }
 
   async deleteUserSessions(userId: string): Promise<void> {
-    const keys = await this.redis.keys(`session:${userId}:*`);
-    await this.redis.del(...keys);
+    let cursor = '0';
+    const pattern = `session:${userId}:*`;
+
+    do {
+      const [nextCursor, keys] = await this.redis.scan(
+        cursor,
+        'MATCH',
+        pattern,
+        'COUNT',
+        100,
+      );
+      cursor = nextCursor;
+
+      if (keys.length > 0) {
+        await this.redis.del(...keys);
+      }
+    } while (cursor !== '0');
+  }
+
+  async getUserSessions(userId: string): Promise<DomainSession[]> {
+    let cursor = '0';
+    const pattern = `session:${userId}:*`;
+    const sessions: DomainSession[] = [];
+
+    do {
+      const [nextCursor, keys] = await this.redis.scan(
+        cursor,
+        'MATCH',
+        pattern,
+        'COUNT',
+        100,
+      );
+      cursor = nextCursor;
+
+      if (keys.length === 0) continue;
+
+      const values = await this.redis.mget(...keys);
+
+      for (const value of values) {
+        if (value) {
+          sessions.push(JSON.parse(value));
+        }
+      }
+    } while (cursor !== '0');
+
+    return sessions;
   }
 
   async deleteAll(): Promise<void> {

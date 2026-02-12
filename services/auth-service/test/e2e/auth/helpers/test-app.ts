@@ -1,4 +1,5 @@
 import { Test } from '@nestjs/testing';
+import cookieParser from 'cookie-parser';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Server } from 'http';
 import { AppModule } from '../../../../src/app.module';
@@ -23,6 +24,8 @@ export const createTestApp = async (): Promise<ITestApp> => {
   );
 
   app.useGlobalFilters(new AllExceptionFilter());
+
+  app.use(cookieParser());
 
   await app.init();
 

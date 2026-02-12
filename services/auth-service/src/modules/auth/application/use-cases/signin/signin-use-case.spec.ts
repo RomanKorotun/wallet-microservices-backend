@@ -9,6 +9,7 @@ import type { ICookieService } from '../../../../../modules/auth/domain/services
 import type { IPasswordService } from '../../../../../modules/auth/domain/services/password.service';
 import type { ITokenService } from '../../../../../modules/auth/domain/services/token.service';
 import { ISessionRepository } from '../../../../../modules/auth/domain/repositories/session.repository';
+import { SESSION_TTL_SECONDS } from '../../../../../common/constants/session.constants';
 
 describe('SigninUseCase', () => {
   let signinUseCase: SigninUseCase;
@@ -120,9 +121,9 @@ describe('SigninUseCase', () => {
     await signinUseCase.execute(res, dto);
 
     expect(sessionRepository.set).toHaveBeenCalledWith(
-      expect.stringMatching(/^session:/),
+      expect.stringMatching(new RegExp(`^session:${response.id}:`)),
       { userId: response.id, createdAt: expect.any(Number) },
-      7 * 24 * 60 * 60,
+      SESSION_TTL_SECONDS,
     );
   });
 

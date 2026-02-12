@@ -1,6 +1,7 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { randomUUID } from 'crypto';
 import { TokenType } from '../../domain/enums/token-type.enum';
 import type { ITokenService } from '../../domain/services/token.service';
 import type { IJwtPayload } from '../../domain/types/jwt-payload.interface';
@@ -25,7 +26,8 @@ export class TokenService implements ITokenService {
     const refreshTokenTime = +this.configService.getOrThrow(
       'JWT_REFRESH_TOKEN_TIME',
     );
-    const payload = { id: userId };
+
+    const payload = { id: userId, jti: randomUUID() };
 
     if (tokenType === TokenType.ACCESS) {
       return this.jwtService.sign(payload, {
