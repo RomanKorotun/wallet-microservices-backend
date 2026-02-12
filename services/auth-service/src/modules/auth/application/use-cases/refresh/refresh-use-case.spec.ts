@@ -6,6 +6,7 @@ import { TokenType } from '../../../../../modules/auth/domain/enums/token-type.e
 import type { ICookieService } from '../../../../../modules/auth/domain/services/cookie.service';
 import type { ITokenService } from '../../../../../modules/auth/domain/services/token.service';
 import type { ISessionRepository } from '../../../../../modules/auth/domain/repositories/session.repository';
+import { SESSION_TTL_SECONDS } from '../../../../../common/constants/session.constants';
 
 describe('RefreshUseCase', () => {
   let refreshUseCase: RefreshUseCase;
@@ -28,7 +29,7 @@ describe('RefreshUseCase', () => {
         {
           provide: 'ISessionRepository',
           useValue: {
-            deleteByRefreshToken: jest.fn(),
+            deleteSession: jest.fn(),
             set: jest.fn(),
           },
         },
@@ -70,9 +71,9 @@ describe('RefreshUseCase', () => {
 
     await refreshUseCase.execute(req, res, userId);
 
-    expect(sessionRepository.deleteByRefreshToken).toHaveBeenCalledWith(
-      oldRefreshToken,
-    );
+    const oldSessionKey = `session:${userId}:${oldRefreshToken}`;
+
+    expect(sessionRepository.deleteSession).toHaveBeenCalledWith(oldSessionKey);
   });
 
   it('should generate access and refresh tokens with correct types', async () => {
@@ -106,9 +107,9 @@ describe('RefreshUseCase', () => {
 
     expect(sessionRepository.set).toHaveBeenCalledTimes(1);
     expect(sessionRepository.set).toHaveBeenCalledWith(
-      expect.stringMatching(/^session:/),
+      expect.stringMatching(new RegExp(`^session:${userId}:`)),
       { userId, createdAt: expect.any(Number) },
-      7 * 24 * 60 * 60,
+      SESSION_TTL_SECONDS,
     );
   });
 

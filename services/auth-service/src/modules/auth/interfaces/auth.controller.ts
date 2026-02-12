@@ -83,9 +83,10 @@ export class AuthController {
   @UseGuards(AuthGuard('jwt-access'))
   @HttpCode(HttpStatus.OK)
   @Post('signout')
-  signout(
+  async signout(
     @Res({ passthrough: true }) res: Response,
-  ): SignoutSuccessResponseDto {
-    return this.signoutUseCase.execute(res);
+    @CurrentUser() user: DomainUser,
+  ): Promise<SignoutSuccessResponseDto> {
+    return await this.signoutUseCase.execute(res, user.id);
   }
 }

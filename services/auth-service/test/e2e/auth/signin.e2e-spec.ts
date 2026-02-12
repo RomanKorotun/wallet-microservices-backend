@@ -6,7 +6,7 @@ import { createTestApp, ITestApp } from './helpers/test-app';
 import { getCookies } from './helpers/cookies.helper';
 import { getToken } from './helpers/tokens.helper';
 import { TokenType } from '../../../src/modules/auth/domain/enums/token-type.enum';
-import { postRequest } from './helpers/request.helper';
+import { signinRequest, signupRequest } from './helpers/request.helper';
 import { ISessionRepository } from '../../../src/modules/auth/domain/repositories/session.repository';
 
 describe('AuthController e2e - signin', () => {
@@ -28,7 +28,7 @@ describe('AuthController e2e - signin', () => {
   });
 
   beforeEach(async () => {
-    await postRequest(server, urlSignup, signupDto);
+    await signupRequest(server, signupDto);
   });
 
   afterEach(async () => {
@@ -62,75 +62,52 @@ describe('AuthController e2e - signin', () => {
     invalid: { ...signinDto, password: '123' },
     validButWrong: { ...signinDto, password: 'R999999' },
   };
-  const urlSignup = '/api/auth/signup';
-  const urlSignin = '/api/auth/signin';
 
   it('should return 400 if body is empty', async () => {
-    const { statusCode } = await postRequest(server, urlSignin, {});
+    const { statusCode } = await signinRequest(server, {});
     expect(statusCode).toBe(400);
   });
 
   it('should return 400 if email is missing', async () => {
-    const { statusCode } = await postRequest(
-      server,
-      urlSignin,
-      invalidEmail.missing,
-    );
+    const { statusCode } = await signinRequest(server, invalidEmail.missing);
     expect(statusCode).toBe(400);
   });
 
   it('should return 400 if email is invalid', async () => {
-    const { statusCode } = await postRequest(
-      server,
-      urlSignin,
-      invalidEmail.invalid,
-    );
+    const { statusCode } = await signinRequest(server, invalidEmail.invalid);
     expect(statusCode).toBe(400);
   });
 
   it('should return 400 if password is missing', async () => {
-    const { statusCode } = await postRequest(
-      server,
-      urlSignin,
-      invalidPassword.missing,
-    );
+    const { statusCode } = await signinRequest(server, invalidPassword.missing);
     expect(statusCode).toBe(400);
   });
 
   it('should return 400 if password is invalid', async () => {
-    const { statusCode } = await postRequest(
-      server,
-      urlSignin,
-      invalidPassword.invalid,
-    );
+    const { statusCode } = await signinRequest(server, invalidPassword.invalid);
     expect(statusCode).toBe(400);
   });
 
   it('should return 401 if user with this email does not exist', async () => {
-    const { statusCode } = await postRequest(
-      server,
-      urlSignin,
-      invalidEmail.notExist,
-    );
+    const { statusCode } = await signinRequest(server, invalidEmail.notExist);
     expect(statusCode).toBe(401);
   });
 
   it('should return 401 if password is incorrect', async () => {
-    const { statusCode } = await postRequest(
+    const { statusCode } = await signinRequest(
       server,
-      urlSignin,
       invalidPassword.validButWrong,
     );
     expect(statusCode).toBe(401);
   });
 
   it('should return status 200', async () => {
-    const { statusCode } = await postRequest(server, urlSignin, signinDto);
+    const { statusCode } = await signinRequest(server, signinDto);
     expect(statusCode).toBe(200);
   });
 
   it('should return user object with correct fields', async () => {
-    const response = await postRequest(server, urlSignin, signinDto);
+    const response = await signinRequest(server, signinDto);
     expect(response.body).toEqual({
       message: 'Access Token i Refresh Token встановлені в кукі',
       user: {
@@ -142,52 +119,54 @@ describe('AuthController e2e - signin', () => {
   });
 
   it('should have valid payload in accessToken', async () => {
-    const response = await postRequest(server, urlSignin, signinDto);
-    const cookiesArray: string[] = getCookies(response);
-    const accessToken = getToken(cookiesArray, TokenType.ACCESS);
+    const response = await signinRequest(server, signinDto);
+    const cookies = getCookies(response);
+    const accessToken = getToken(cookies, TokenType.ACCESS);
     const payload = tokenService.decode(accessToken, TokenType.ACCESS);
     expect(payload).toHaveProperty('id');
   });
 
   it('should have valid payload in refreshToken', async () => {
-    const response = await postRequest(server, urlSignin, signinDto);
-    const cookiesArray: string[] = getCookies(response);
-    const refreshToken = getToken(cookiesArray, TokenType.REFRESH);
+    const response = await signinRequest(server, signinDto);
+    const cookies = getCookies(response);
+    const refreshToken = getToken(cookies, TokenType.REFRESH);
     const payload = tokenService.decode(refreshToken, TokenType.REFRESH);
     expect(payload).toHaveProperty('id');
   });
 
   it('should create session in the session repository', async () => {
-    const response = await postRequest(server, urlSignin, signinDto);
-    const cookiesArray: string[] = getCookies(response);
-    const refreshToken = getToken(cookiesArray, TokenType.REFRESH);
-    const session = await sessionRepository.getByRefreshToken(refreshToken);
+    const response = await signinRequest(server, signinDto);
+    const cookies = getCookies(response);
+    const refreshToken = getToken(cookies, TokenType.REFRESH);
+    const payload = tokenService.decode(refreshToken, TokenType.REFRESH);
+    const sessionKey = `session:${payload.id}:${refreshToken}`;
+    const session = await sessionRepository.getSession(sessionKey);
     expect(session).not.toBeNull();
     expect(session!.userId).toBeDefined();
     expect(session!.createdAt).toBeGreaterThan(0);
   });
 
-  it('should set accessToken and refreshToken cookies', async () => {
-    const response = await postRequest(server, urlSignin, signinDto);
-    const cookiesArray: string[] = getCookies(response);
-    expect(cookiesArray.some((c: string) => c.startsWith('accessToken'))).toBe(
+  it('should set accessToken and refreshToken in cookies', async () => {
+    const response = await signinRequest(server, signinDto);
+    const cookies = getCookies(response);
+    expect(cookies.some((c: string) => c.startsWith('accessToken='))).toBe(
       true,
     );
-    expect(cookiesArray.some((c: string) => c.startsWith('refreshToken'))).toBe(
+    expect(cookies.some((c: string) => c.startsWith('refreshToken='))).toBe(
       true,
     );
   });
 
   it('should set cookies with security attributes', async () => {
-    const response = await postRequest(server, urlSignin, signinDto);
-    const cookiesArray: string[] = getCookies(response);
-    expect(cookiesArray.every((c) => c.includes('HttpOnly'))).toBe(true);
+    const response = await signinRequest(server, signinDto);
+    const cookies = getCookies(response);
+    expect(cookies.every((c) => c.includes('HttpOnly'))).toBe(true);
     if (configService.getOrThrow('NODE_ENV') === 'production') {
-      expect(cookiesArray.every((c) => c.includes('Secure'))).toBe(true);
-      expect(cookiesArray.every((c) => c.includes('SameSite=None'))).toBe(true);
+      expect(cookies.every((c) => c.includes('Secure'))).toBe(true);
+      expect(cookies.every((c) => c.includes('SameSite=None'))).toBe(true);
     } else {
-      expect(cookiesArray.every((c) => !c.includes('Secure'))).toBe(true);
-      expect(cookiesArray.every((c) => c.includes('SameSite=Lax'))).toBe(true);
+      expect(cookies.every((c) => !c.includes('Secure'))).toBe(true);
+      expect(cookies.every((c) => c.includes('SameSite=Lax'))).toBe(true);
     }
   });
 });

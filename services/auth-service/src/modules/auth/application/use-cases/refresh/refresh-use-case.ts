@@ -5,6 +5,7 @@ import { RefreshSuccessResponseDto } from '../../../../../modules/auth/interface
 import type { ICookieService } from '../../../../../modules/auth/domain/services/cookie.service';
 import type { ITokenService } from '../../../../../modules/auth/domain/services/token.service';
 import type { ISessionRepository } from '../../../../../modules/auth/domain/repositories/session.repository';
+import { SESSION_TTL_SECONDS } from '../../../../../common/constants/session.constants';
 
 @Injectable()
 export class RefreshUseCase {
@@ -19,26 +20,28 @@ export class RefreshUseCase {
     res: Response,
     userId: string,
   ): Promise<RefreshSuccessResponseDto> {
-    const oldRefreshToke = req.cookies?.refreshToken;
-    if (!oldRefreshToke) {
+    const oldRefreshToken = req.cookies?.refreshToken;
+
+    if (!oldRefreshToken) {
       throw new UnauthorizedException('Відсутній refrehToken');
     }
-    await this.sessionRepository.deleteByRefreshToken(oldRefreshToke);
+
+    const oldSessionKey = `session:${userId}:${oldRefreshToken}`;
+
+    await this.sessionRepository.deleteSession(oldSessionKey);
 
     const accessToken = this.tokenService.generate(userId, TokenType.ACCESS);
     const refreshToken = this.tokenService.generate(userId, TokenType.REFRESH);
 
-    const sessionKey = `session:${refreshToken}`;
+    const sessionKey = `session:${userId}:${refreshToken}`;
     await this.sessionRepository.set(
       sessionKey,
       { userId, createdAt: Date.now() },
-      7 * 24 * 60 * 60,
+      SESSION_TTL_SECONDS,
     );
 
     this.cookieService.setAuthCookie(res, accessToken, TokenType.ACCESS);
     this.cookieService.setAuthCookie(res, refreshToken, TokenType.REFRESH);
-    return {
-      message: 'Access Token i Refresh Token встановлені в cookies',
-    };
+    return { message: 'Access Token i Refresh Token встановлені в cookies' };
   }
 }

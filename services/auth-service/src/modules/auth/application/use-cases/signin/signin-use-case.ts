@@ -8,6 +8,7 @@ import type { ICookieService } from '../../../../../modules/auth/domain/services
 import type { IPasswordService } from '../../../../../modules/auth/domain/services/password.service';
 import type { ITokenService } from '../../../../../modules/auth/domain/services/token.service';
 import type { ISessionRepository } from '../../../../../modules/auth/domain/repositories/session.repository';
+import { SESSION_TTL_SECONDS } from '../../../../../common/constants/session.constants';
 
 @Injectable()
 export class SigninUseCase {
@@ -45,7 +46,7 @@ export class SigninUseCase {
 
     const refreshToken = this.tokenService.generate(user.id, TokenType.REFRESH);
 
-    const sessionKey = `session:${refreshToken}`;
+    const sessionKey = `session:${user.id}:${refreshToken}`;
 
     await this.sessionRepository.set(
       sessionKey,
@@ -53,7 +54,7 @@ export class SigninUseCase {
         userId: user.id,
         createdAt: Date.now(),
       },
-      7 * 24 * 60 * 60,
+      SESSION_TTL_SECONDS,
     );
 
     this.cookieService.setAuthCookie(res, accessToken, TokenType.ACCESS);
