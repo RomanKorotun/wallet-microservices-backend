@@ -8,9 +8,7 @@
 
 # COPY . ./
 
-# ENV NODE_ENV=test
-
-# CMD ["sh","-c","yarn test && yarn test:e2e"]
+# CMD ["sh","-c","yarn lint"]
 
 
 
