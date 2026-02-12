@@ -18,7 +18,7 @@ ENV NODE_ENV=test
 CMD ["yarn", "test:e2e"]
 
 # Development
-FROM base AS dev 
+FROM base AS development 
 RUN npx prisma generate 
 ENV NODE_ENV=development 
 EXPOSE 3000 

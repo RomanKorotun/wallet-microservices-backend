@@ -16,21 +16,18 @@ on:
 
 jobs:
   lint:
-    name: Lint Check
+    name: Lint
     runs-on: ubuntu-latest
 
     steps:
       - name: Clone repository
         uses: actions/checkout@v3
 
-      - name: Build lint image
-        run: docker build --target lint -t auth-service:lint ./services/auth-service
-
-      - name: Run lint in container
-        run: docker run --rm auth-service:lint
+      - name: Run lint
+        run: ./services/auth-service/scripts/lint.sh
 
   unit-tests:
-    name: Run Unit Tests
+    name: Unit Tests
     runs-on: ubuntu-latest
     needs: lint
 
@@ -38,14 +35,11 @@ jobs:
       - name: Clone repository
         uses: actions/checkout@v3
 
-      - name: Build unit test image
-        run: docker build --target unit -t auth-service:unit ./services/auth-service
-
-      - name: Run unit test in container
-        run: docker run --rm auth-service:unit
+      - name: Run unit test
+        run: ./services/auth-service/scripts/unit-test.sh
 
   e2e-tests:
-    name: Run E2E Tests
+    name: E2E Tests
     runs-on: ubuntu-latest
     needs: unit-tests
 
@@ -88,7 +82,7 @@ jobs:
             auth-service:e2e
 
   build:
-    name: Build Check
+    name: Build
     runs-on: ubuntu-latest
     needs: e2e-tests
 
@@ -96,11 +90,11 @@ jobs:
       - name: Clone repository
         uses: actions/checkout@v3
 
-      - name: Build project image
-        run: docker build --target build -t auth-service:build ./services/auth-service
+      - name: Run build
+        run: ./services/auth-service/scripts/build.sh
 
   docker:
-    name: Docker Image
+    name: Docker Build & Push
     runs-on: ubuntu-latest
     needs: build
     if: github.event_name == 'push'
@@ -109,11 +103,8 @@ jobs:
       - name: Clone repository
         uses: actions/checkout@v3
 
-      - name: Login to Docker Hub
-        run: echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
-
-      - name: Build & Push
-        run: |
-          docker build -target production \
-          -t ${{ secrets.DOCKERHUB_USERNAME }}/auth-service:latest ./services/auth-service
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/auth-service:latest
+      - name: Run docker build & push
+        env:
+          DOCKERHUB_USERNAME: ${{secrets.DOCKERHUB_USERNAME}}
+          DOCKERHUB_TOKEN: ${{secrets.DOCKERHUB_TOKEN}}
+        run: ./services/auth-service/scripts/docker-build-push.sh
