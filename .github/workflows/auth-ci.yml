@@ -76,15 +76,16 @@ jobs:
         run: docker build --target e2e -t auth-service:e2e ./services/auth-service
 
       - name: Run E@E test in container
-        run: docker run --rm \
-          -e DATABASE_URL=postgresql://${{ secrets.POSTGRES_USER_AUTH }}:${{ secrets.POSTGRES_PASSWORD_AUTH }}@postgres:5432/${{ secrets.POSTGRES_DB_AUTH }}?schema=public \
-          -e JWT_ACCESS_TOKEN_SECRET=${{ secrets.JWT_ACCESS_TOKEN_SECRET }} \
-          -e JWT_ACCESS_TOKEN_TIME=${{ secrets.JWT_ACCESS_TOKEN_TIME }} \
-          -e JWT_REFRESH_TOKEN_SECRET=${{ secrets.JWT_REFRESH_TOKEN_SECRET }} \
-          -e JWT_REFRESH_TOKEN_TIME=${{ secrets.JWT_REFRESH_TOKEN_TIME }} \
-          -e REDIS_USE_TLS_AUTH=${{ secrets.REDIS_USE_TLS_AUTH }} \
-          -e REDIS_URL_AUTH=${{ secrets.REDIS_URL_AUTH }} \
-          auth-service:e2e
+        run: |
+          docker run --rm \
+            -e DATABASE_URL=postgresql://${{ secrets.POSTGRES_USER_AUTH }}:${{ secrets.POSTGRES_PASSWORD_AUTH }}@postgres:5432/${{ secrets.POSTGRES_DB_AUTH }}?schema=public \
+            -e JWT_ACCESS_TOKEN_SECRET=${{ secrets.JWT_ACCESS_TOKEN_SECRET }} \
+            -e JWT_ACCESS_TOKEN_TIME=${{ secrets.JWT_ACCESS_TOKEN_TIME }} \
+            -e JWT_REFRESH_TOKEN_SECRET=${{ secrets.JWT_REFRESH_TOKEN_SECRET }} \
+            -e JWT_REFRESH_TOKEN_TIME=${{ secrets.JWT_REFRESH_TOKEN_TIME }} \
+            -e REDIS_USE_TLS_AUTH=${{ secrets.REDIS_USE_TLS_AUTH }} \
+            -e REDIS_URL_AUTH=${{ secrets.REDIS_URL_AUTH }} \
+            auth-service:e2e
 
   build:
     name: Build Check
