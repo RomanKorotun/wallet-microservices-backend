@@ -24,7 +24,9 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Run lint
-        run: ./services/auth-service/scripts/lint.sh
+        run: |
+          chmod +x ./services/auth-service/scripts/lint.sh
+          ./services/auth-service/scripts/lint.sh
 
   unit-tests:
     name: Unit Tests
@@ -36,7 +38,9 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Run unit test
-        run: ./services/auth-service/scripts/unit-test.sh
+        run: |
+          chmod +x ./services/auth-service/scripts/unit-test.sh
+          ./services/auth-service/scripts/unit-test.sh
 
   e2e-tests:
     name: E2E Tests
@@ -91,7 +95,9 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Run build
-        run: ./services/auth-service/scripts/build.sh
+        run: |
+          chmod +x ./services/auth-service/scripts/build.sh
+          ./services/auth-service/scripts/build.sh
 
   docker:
     name: Docker Build & Push
@@ -107,4 +113,6 @@ jobs:
         env:
           DOCKERHUB_USERNAME: ${{secrets.DOCKERHUB_USERNAME}}
           DOCKERHUB_TOKEN: ${{secrets.DOCKERHUB_TOKEN}}
-        run: ./services/auth-service/scripts/docker-build-push.sh
+        run: |
+          chmod +x ./services/auth-service/scripts/docker-build-push.sh
+          ./services/auth-service/scripts/docker-build-push.sh
