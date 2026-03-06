@@ -25,7 +25,7 @@ docker compose -f docker-compose.infra-core.yml -f services/auth-service/docker-
 
 unit-test:
 bash
-docker build --target unit -t auth-service:unit
+docker build --target unit -t auth-service:unit .
 docker run --name auth-service-unit auth-service:unit
 
 e2e:

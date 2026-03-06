@@ -20,6 +20,7 @@ services:
     environment:
       POSTGRES_USER: devuser
       POSTGRES_PASSWORD: devuser
+      POSTGRES_DB: auth_dev
     healthcheck:
       test: ['CMD', 'pg_isready', '-U', 'devuser']
       interval: 10s
