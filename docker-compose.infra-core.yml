@@ -1,6 +1,5 @@
 services:
   postgres:
-    container_name: postgres
     image: postgres:16-alpine
     ports:
       - "5433:5432"
@@ -9,7 +8,6 @@ services:
       POSTGRES_PASSWORD: devuser
     volumes:
       - pg-data:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "devuser"]
       interval: 10s
@@ -19,7 +17,6 @@ services:
       - dev-net
 
   rabbitmq:
-    container_name: rabbitmq
     image: rabbitmq:4-management-alpine
     ports:
       - 5672:5672
@@ -32,8 +29,7 @@ services:
     networks:
       - dev-net
 
-  redis-dev:
-    container_name: redis-dev
+  redis:
     image: redis:7-alpine
     ports:
       - "6380:6379"
@@ -48,19 +44,19 @@ services:
     networks:
       - dev-net
 
-  redis-test:
-    container_name: redis-test
-    image: redis:7-alpine
-    ports:
-      - "6381:6379"
-    command: ["redis-server", "--appendonly", "yes"]
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 2s
-      retries: 5
-    networks:
-      - dev-net
+  # redis-test:
+  #   container_name: redis-test
+  #   image: redis:7-alpine
+  #   ports:
+  #     - "6381:6379"
+  #   command: ["redis-server", "--appendonly", "yes"]
+  #   healthcheck:
+  #     test: ["CMD", "redis-cli", "ping"]
+  #     interval: 5s
+  #     timeout: 2s
+  #     retries: 5
+  #   networks:
+  #     - dev-net
 
 volumes:
   pg-data:

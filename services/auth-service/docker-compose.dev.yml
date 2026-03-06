@@ -1,10 +1,10 @@
 services:
   auth-service:
-    container_name: auth-service
+    image: auth-service:dev
     build:
       context: ./services/auth-service
-      dockerfile: Dockerfile.dev
-    image: auth-service:dev
+      dockerfile: Dockerfile
+      target: development
     ports:
       - '3000:3000'
     volumes:
@@ -17,7 +17,7 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      redis-dev:
+      redis:
         condition: service_healthy
       rabbitmq:
         condition: service_started

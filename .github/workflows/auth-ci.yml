@@ -42,48 +42,74 @@ jobs:
           chmod +x ./services/auth-service/scripts/unit-test.sh
           ./services/auth-service/scripts/unit-test.sh
 
-  e2e-tests:
-    name: E2E Tests
+  # e2e-tests:
+  #   name: E2E Tests
+  #   runs-on: ubuntu-latest
+  #   needs: unit-tests
+
+  #   services:
+  #     postgres:
+  #       image: postgres:16
+  #       env:
+  #         POSTGRES_USER: ${{ secrets.POSTGRES_USER_AUTH }}
+  #         POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD_AUTH }}
+  #         POSTGRES_DB: ${{ secrets.POSTGRES_DB_AUTH }}
+  #       ports:
+  #         - 5432:5432
+  #       options: >-
+  #         --health-cmd="pg_isready -U postgres"
+
+  #     redis:
+  #       image: redis:7
+  #       ports:
+  #         - 6379:6379
+  #       options: >-
+  #         --health-cmd="redis-cli ping"
+
+  #   steps:
+  #     - name: Clone repository
+  #       uses: actions/checkout@v3
+
+  #     - name: Build E2E test image
+  #       run: docker build --target e2e -t auth-service:e2e ./services/auth-service
+
+  #     - name: Run E@E test in container
+  #       run: |
+  #         docker run --rm --network host \
+  #           -e DATABASE_URL=postgresql://${{ secrets.POSTGRES_USER_AUTH }}:${{ secrets.POSTGRES_PASSWORD_AUTH }}@localhost:5432/${{ secrets.POSTGRES_DB_AUTH }}?schema=public \
+  #           -e JWT_ACCESS_TOKEN_SECRET=${{ secrets.JWT_ACCESS_TOKEN_SECRET }} \
+  #           -e JWT_ACCESS_TOKEN_TIME=${{ secrets.JWT_ACCESS_TOKEN_TIME }} \
+  #           -e JWT_REFRESH_TOKEN_SECRET=${{ secrets.JWT_REFRESH_TOKEN_SECRET }} \
+  #           -e JWT_REFRESH_TOKEN_TIME=${{ secrets.JWT_REFRESH_TOKEN_TIME }} \
+  #           -e REDIS_USE_TLS_AUTH=${{ secrets.REDIS_USE_TLS_AUTH }} \
+  #           -e REDIS_URL_AUTH=${{ secrets.REDIS_URL_AUTH }} \
+  #           auth-service:e2e
+
+    e2e-tests:
+    ame: E2E Tests
     runs-on: ubuntu-latest
     needs: unit-tests
 
-    services:
-      postgres:
-        image: postgres:16
-        env:
-          POSTGRES_USER: ${{ secrets.POSTGRES_USER_AUTH }}
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD_AUTH }}
-          POSTGRES_DB: ${{ secrets.POSTGRES_DB_AUTH }}
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd="pg_isready -U postgres"
-
-      redis:
-        image: redis:7
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd="redis-cli ping"
-
     steps:
-      - name: Clone repository
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Build E2E test image
-        run: docker build --target e2e -t auth-service:e2e ./services/auth-service
-
-      - name: Run E@E test in container
+      - name: Create .env.test
         run: |
-          docker run --rm --network host \
-            -e DATABASE_URL=postgresql://${{ secrets.POSTGRES_USER_AUTH }}:${{ secrets.POSTGRES_PASSWORD_AUTH }}@localhost:5432/${{ secrets.POSTGRES_DB_AUTH }}?schema=public \
-            -e JWT_ACCESS_TOKEN_SECRET=${{ secrets.JWT_ACCESS_TOKEN_SECRET }} \
-            -e JWT_ACCESS_TOKEN_TIME=${{ secrets.JWT_ACCESS_TOKEN_TIME }} \
-            -e JWT_REFRESH_TOKEN_SECRET=${{ secrets.JWT_REFRESH_TOKEN_SECRET }} \
-            -e JWT_REFRESH_TOKEN_TIME=${{ secrets.JWT_REFRESH_TOKEN_TIME }} \
-            -e REDIS_USE_TLS_AUTH=${{ secrets.REDIS_USE_TLS_AUTH }} \
-            -e REDIS_URL_AUTH=${{ secrets.REDIS_URL_AUTH }} \
-            auth-service:e2e
+          echo "DATABASE_URL=postgresql://${{ secrets.POSTGRES_USER_AUTH }}:${{ secrets.POSTGRES_PASSWORD_AUTH }}@postgres:5432/${{ secrets.POSTGRES_DB_AUTH }}?schema=public" > ./services/auth-service/.env.test
+          echo "JWT_ACCESS_TOKEN_SECRET=${{ secrets.JWT_ACCESS_TOKEN_SECRET }}" >> ./services/auth-service/.env.test
+          echo "JWT_ACCESS_TOKEN_TIME=${{ secrets.JWT_ACCESS_TOKEN_TIME }}" >> ./services/auth-service/.env.test
+          echo "JWT_REFRESH_TOKEN_SECRET=${{ secrets.JWT_REFRESH_TOKEN_SECRET }}" >> ./services/auth-service/.env.test
+          echo "JWT_REFRESH_TOKEN_TIME=${{ secrets.JWT_REFRESH_TOKEN_TIME }}" >> ./services/auth-service/.env.test
+          echo "REDIS_USE_TLS_AUTH=${{secrets.REDIS_USE_TLS_AUTH}}" >> ./services/auth-service/.env.test
+          echo "REDIS_URL_AUTH=${{ secrets.REDIS_URL_AUTH }}" >> ./services/auth-service/.env.test
+
+      - name: Run E2E tests with docker-compose
+        working-directory: ./services/auth-service
+        run: |
+          docker compose -f docker-compose.e2e.yml -p auth-service-test up --build -d
+          docker compose -f docker-compose.e2e.yml -p auth-service-test logs -f auth-service-test
+          docker compose -f docker-compose.e2e.yml -p auth-service-test down -v
 
   build:
     name: Build
