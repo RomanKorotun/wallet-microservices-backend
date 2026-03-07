@@ -2,16 +2,16 @@ services:
   auth-service:
     image: auth-service:dev
     build:
-      context: ./services/auth-service
+      context: .
       dockerfile: Dockerfile
       target: development
     ports:
       - '3000:3000'
     volumes:
-      - ./services/auth-service:/app
+      - .:/app
       - auth-service-node-modules:/app/node_modules
     env_file:
-      - ./services/auth-service/.env
+      - .env
     networks:
       - dev-net
     depends_on:
