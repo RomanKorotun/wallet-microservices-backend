@@ -1,6 +1,9 @@
 {
   "name": "Auth Service Dev Container",
-  "dockerComposeFile": ["../../../docker-compose.infra-core.yml","../docker-compose.auth-dev.yml"],
+  "dockerComposeFile": [
+    "../docker-compose.dev.yml",
+    "../../../docker-compose.infra-core.yml"
+  ],
   "service": "auth-service",
   "workspaceFolder": "/app",
   "customizations": {

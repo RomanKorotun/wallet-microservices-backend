@@ -1,6 +1,6 @@
 FROM node:20-alpine AS base
 WORKDIR /app
-COPY package*.json yarn.lock ./
+COPY package.json yarn.lock ./
 RUN yarn install --frozen-lockfile
 COPY . ./
 
@@ -24,6 +24,11 @@ ENV NODE_ENV=development
 EXPOSE 3000 
 CMD ["sh", "-c", "npx prisma migrate deploy && yarn dev"]
 
+# Deploy
+FROM base AS deploy
+RUN npx prisma generate
+CMD ["sh", "-c", "npx prisma migrate deploy"]
+
 # Build
 FROM base AS build 
 RUN npx prisma generate 
@@ -32,7 +37,7 @@ RUN yarn build
 #  Production
 FROM node:20-alpine AS production
 WORKDIR /app
-COPY package*.json yarn.lock ./
+COPY package.json yarn.lock ./
 RUN yarn install --frozen-lockfile --production
 COPY --from=build /app/prisma ./prisma
 COPY --from=build /app/dist ./dist
