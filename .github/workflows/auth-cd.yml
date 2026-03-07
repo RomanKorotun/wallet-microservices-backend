@@ -20,8 +20,8 @@ jobs:
           DATABASE_URL: ${{secrets.DATABASE_URL}}
         working-directory: ./services/auth-service/scripts
         run: |
-          chmod +x ./deploy
-          ./deploy
+          chmod +x ./deploy.sh
+          ./deploy.sh
 
       - name: Trigger Render Deploy Hook
         run: |
